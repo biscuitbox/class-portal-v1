@@ -1071,6 +1071,54 @@
   .status-line .dot{ font-size:1.1em; }
   .status-line .muted{ color:var(--muted); font-weight:600; }
 
+  /* ── 잠금 패턴 ────────────────────────── */
+  .lock-dialog{ max-width:420px; text-align:center; }
+  .lock-dialog h3{ margin-bottom:6px; }
+  .lock-dialog p{ margin-bottom:16px; }
+  .lock-pad{
+    position:relative;
+    width:min(74vw, 300px);
+    max-width:100%;
+    aspect-ratio:1 / 1;
+    margin:0 auto 18px;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .lock-pad svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .lock-line{ fill:none; stroke:#1d4ed8; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; opacity:.75; }
+  .lock-dots{
+    position:absolute;
+    inset:0;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    grid-template-rows:repeat(3, 1fr);
+  }
+  .lock-dot{ display:grid; place-items:center; }
+  .lock-dot i{
+    display:block;
+    width:34%;
+    aspect-ratio:1 / 1;
+    border-radius:50%;
+    background:#d3dae4;
+    transition:transform .12s ease, background .12s ease;
+  }
+  .lock-dot.on i{ background:var(--blue); transform:scale(1.5); }
+  .lock-pad.err .lock-line{ stroke:var(--danger); }
+  .lock-pad.err .lock-dot.on i{ background:var(--danger); }
+  .lock-pad.ok .lock-line{ stroke:var(--ok); }
+  .lock-pad.ok .lock-dot.on i{ background:var(--ok); }
+  .lock-dialog .row{ justify-content:center; }
+  @keyframes lockShake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-9px); }
+    40%{ transform:translateX(9px); }
+    60%{ transform:translateX(-6px); }
+    80%{ transform:translateX(6px); }
+  }
+  .lock-dialog.shake{ animation:lockShake .4s; }
+  .lock-hint{ color:var(--muted); font-size:.85em; margin:0 0 4px; }
+
   /* ── 학생 공개 모드 ───────────────────── */
   .head-actions{
     display:flex;
@@ -1134,6 +1182,8 @@
   body.student .tab[data-tab="presenter"],
   body.student .tab[data-tab="setup"]{ display:none; }
   body.student .sync-badge.on{ color:#0a7a45; }
+  body.student .lock-dot.on i{ background:#0f9455; }
+  body.student .lock-line{ stroke:#0f9455; }
   body.student .inline-msg{ display:none !important; }
 
   /* ── 인쇄 ─────────────────────────────── */
@@ -1479,6 +1529,24 @@
         </div>
 
         <div class="tool-panel">
+          <h3 class="tool-title">🔒 학생 화면 잠금</h3>
+          <div class="status-line">
+            <span><span class="dot" id="lockDot">🔓</span> <span id="lockState">잠금 패턴 없음 — 누구나 교사 화면으로 돌아올 수 있습니다</span></span>
+            <button class="btn-main" id="lockSetBtn">패턴 설정</button>
+            <button class="btn-danger" id="lockClearBtn" hidden>잠금 해제</button>
+          </div>
+          <div class="note-box">
+            패턴을 정해 두면, 학생 화면에서 <b>교사용으로 돌아가기</b>를 눌렀을 때 패턴을 그려야 넘어갑니다.
+            교실 TV나 교사 PC를 학생이 만질 때 대비용입니다. 다섯 번 틀리면 30초 동안 다시 시도할 수 없습니다.
+          </div>
+          <div class="note-box">
+            패턴은 <b>이 브라우저에만</b> 저장되며 다른 기기·서버로 가지 않습니다.
+            그래서 학생용 주소(<span class="inline-code">?mode=student</span>)로 연 기기에는 애초에 돌아가기 버튼이 나오지 않습니다.
+            패턴을 잊으면 이 브라우저의 방문 기록·사이트 데이터를 지우면 초기화됩니다.
+          </div>
+        </div>
+
+        <div class="tool-panel">
           <h3 class="tool-title">🚀 학생에게 보여 주기</h3>
           <div class="note-box">
             구글 로그인과 학생 공유는 <b>웹 주소(https://)로 열었을 때</b>만 동작합니다.
@@ -1510,6 +1578,26 @@
 
 </div>
 
+<!-- 잠금 패턴 -->
+<div class="overlay" id="lockOverlay" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <div class="dialog lock-dialog" id="lockDialog">
+    <h3 id="lockTitle">🔒 잠금 패턴</h3>
+    <p id="lockMsg">점을 이어 그려 주세요.</p>
+    <div class="lock-pad" id="lockPad">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <polyline class="lock-line" id="lockLine" points=""></polyline>
+      </svg>
+      <div class="lock-dots" id="lockDots"></div>
+    </div>
+    <p class="lock-hint">점을 누른 채 드래그하거나, 점을 하나씩 눌러 이은 뒤 확인을 누르세요.</p>
+    <div class="row">
+      <button id="lockClear">지우기</button>
+      <button id="lockCancel">취소</button>
+      <button class="btn-main" id="lockOk">확인</button>
+    </div>
+  </div>
+</div>
+
 <!-- 확인 상자 (confirm 대체) -->
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
   <div class="dialog">
@@ -1536,7 +1624,7 @@
     projectId: "class-portal-v1",
     storageBucket: "class-portal-v1.firebasestorage.app",
     messagingSenderId: "1007552258708",
-    appId: "1:1007552258708:web:53795fd60fc830be154a81"    
+    appId: "1:1007552258708:web:53795fd60fc830be154a81"
   };
 </script>
 <!-- ▲▲▲ 여기까지 붙여넣는 자리입니다 ▲▲▲ -->
@@ -1716,7 +1804,22 @@
     }
   }
 
-  modeSwitch.addEventListener('click', function () { setStudentMode(!studentMode); });
+  modeSwitch.addEventListener('click', function () {
+    if (!studentMode) {                       /* 교사 → 학생 */
+      setStudentMode(true);
+      if (!lockData) {
+        setTimeout(function () {
+          showNotice('설정·배포 탭에서 잠금 패턴을 정하면, 학생이 교사 화면으로 돌아갈 수 없습니다.');
+        }, 4200);
+      }
+      return;
+    }
+    if (lockData) {                           /* 학생 → 교사: 패턴 확인 */
+      openLock('verify', function () { setStudentMode(false); });
+      return;
+    }
+    setStudentMode(false);
+  });
 
   /* ══════════════════════════════════════════════════
      2. 공통 인원 / 결석자
@@ -3300,6 +3403,305 @@
   }
 
   /* ══════════════════════════════════════════════════
+     10-2. 잠금 패턴 (학생 화면 → 교사 화면)
+     ══════════════════════════════════════════════════ */
+  var KEY_LOCK = 'classroom-lock-v1';
+  var MIN_DOTS = 4;
+  var MAX_FAILS = 5;
+  var COOLDOWN = 30;                       /* 초 */
+
+  var lockData = null;                     /* { hash: '...', len: n } */
+  var lockPurpose = 'verify';              /* 'verify' | 'set' | 'confirm' */
+  var lockFirstSeq = null;
+  var lockSeq = [];
+  var lockFails = 0;
+  var lockCooldownLeft = 0;
+  var lockCooldownTimer = null;
+  var lockOnSuccess = null;
+  var lockCenters = [];
+  var lockDrawing = false;
+  var lockMoved = 0;
+  var lockLastPt = null;
+
+  var lockOverlay = document.getElementById('lockOverlay');
+  var lockDialog = document.getElementById('lockDialog');
+  var lockPad = document.getElementById('lockPad');
+  var lockDotsBox = document.getElementById('lockDots');
+  var lockLine = document.getElementById('lockLine');
+  var lockTitle = document.getElementById('lockTitle');
+  var lockMsg = document.getElementById('lockMsg');
+  var lockOkBtn = document.getElementById('lockOk');
+
+  /* 점 9개 만들기 */
+  (function buildDots() {
+    for (var i = 0; i < 9; i++) {
+      var d = el('div', 'lock-dot');
+      d.setAttribute('data-i', i);
+      d.appendChild(document.createElement('i'));
+      lockDotsBox.appendChild(d);
+    }
+  })();
+
+  function lockHash(seq) {
+    var s = 'classroom-pattern:' + seq.join('-');
+    var h = 5381;
+    for (var i = 0; i < s.length; i++) h = (((h * 33) ^ s.charCodeAt(i)) >>> 0);
+    return h.toString(36);
+  }
+
+  function dotCenter(i) {          /* viewBox(100×100) 기준 좌표 */
+    return { x: (i % 3) * 33.333 + 16.667, y: Math.floor(i / 3) * 33.333 + 16.667 };
+  }
+
+  function drawLock(livePoint) {
+    var pts = lockSeq.map(function (i) {
+      var c = dotCenter(i);
+      return c.x.toFixed(1) + ',' + c.y.toFixed(1);
+    });
+    if (livePoint && lockSeq.length) pts.push(livePoint.x.toFixed(1) + ',' + livePoint.y.toFixed(1));
+    lockLine.setAttribute('points', pts.join(' '));
+    Array.prototype.forEach.call(lockDotsBox.children, function (d, i) {
+      d.classList.toggle('on', lockSeq.indexOf(i) !== -1);
+    });
+  }
+
+  function resetLockPad() {
+    lockSeq = [];
+    lockPad.classList.remove('err', 'ok');
+    drawLock(null);
+  }
+
+  function padPoint(e) {
+    var r = lockPad.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    return { x: (e.clientX - r.left) / r.width * 100, y: (e.clientY - r.top) / r.height * 100 };
+  }
+
+  function hitDot(p) {
+    for (var i = 0; i < 9; i++) {
+      var c = dotCenter(i);
+      var dx = p.x - c.x, dy = p.y - c.y;
+      if (dx * dx + dy * dy < 14 * 14) return i;
+    }
+    return -1;
+  }
+
+  function addDot(i) {
+    if (i < 0 || lockSeq.indexOf(i) !== -1) return false;
+    lockSeq.push(i);
+    lockPad.classList.remove('err', 'ok');
+    return true;
+  }
+
+  lockPad.addEventListener('pointerdown', function (e) {
+    if (lockCooldownLeft > 0) return;
+    var p = padPoint(e);
+    if (!p) return;
+    e.preventDefault();
+    lockDrawing = true;
+    lockMoved = 0;
+    lockLastPt = p;
+    if (lockPad.classList.contains('err') || lockPad.classList.contains('ok')) resetLockPad();
+    addDot(hitDot(p));
+    drawLock(p);
+    try { lockPad.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+  });
+
+  lockPad.addEventListener('pointermove', function (e) {
+    if (!lockDrawing) return;
+    var p = padPoint(e);
+    if (!p) return;
+    if (lockLastPt) {
+      var dx = p.x - lockLastPt.x, dy = p.y - lockLastPt.y;
+      lockMoved += Math.sqrt(dx * dx + dy * dy);
+    }
+    lockLastPt = p;
+    addDot(hitDot(p));
+    drawLock(p);
+  });
+
+  function endStroke() {
+    if (!lockDrawing) return;
+    lockDrawing = false;
+    drawLock(null);
+    /* 끌어서 그렸으면 손을 뗄 때 바로 확인, 톡 눌렀으면 확인 버튼을 기다린다 */
+    if (lockMoved > 6) {
+      if (lockSeq.length >= MIN_DOTS) submitLock();
+      else if (lockSeq.length > 0 && lockCooldownLeft === 0) {
+        shakePad();
+        setLockMessage('점을 ' + MIN_DOTS + '개 이상 이어 주세요.');
+      }
+    }
+  }
+  lockPad.addEventListener('pointerup', endStroke);
+  lockPad.addEventListener('pointercancel', endStroke);
+  lockPad.addEventListener('pointerleave', function () { if (lockDrawing) { lockDrawing = false; drawLock(null); } });
+
+  function setLockMessage(text) { lockMsg.textContent = text; }
+
+  function shakePad() {
+    lockPad.classList.add('err');
+    lockDialog.classList.remove('shake');
+    void lockDialog.offsetWidth;
+    lockDialog.classList.add('shake');
+    setTimeout(function () { lockDialog.classList.remove('shake'); }, 450);
+  }
+
+  function startCooldown() {
+    lockCooldownLeft = COOLDOWN;
+    lockOkBtn.disabled = true;
+    tick();
+    lockCooldownTimer = setInterval(tick, 1000);
+    function tick() {
+      if (lockCooldownLeft <= 0) {
+        clearInterval(lockCooldownTimer);
+        lockCooldownTimer = null;
+        lockFails = 0;
+        lockOkBtn.disabled = false;
+        setLockMessage('다시 그려 주세요.');
+        resetLockPad();
+        return;
+      }
+      setLockMessage('다섯 번 틀렸습니다. ' + lockCooldownLeft + '초 뒤에 다시 시도할 수 있습니다.');
+      lockCooldownLeft--;
+    }
+  }
+
+  function submitLock() {
+    if (lockCooldownLeft > 0) return;
+    if (lockSeq.length < MIN_DOTS) {
+      shakePad();
+      setLockMessage('점을 ' + MIN_DOTS + '개 이상 이어 주세요.');
+      return;
+    }
+
+    if (lockPurpose === 'verify') {
+      if (lockHash(lockSeq) === lockData.hash) {
+        lockPad.classList.add('ok');
+        setLockMessage('잠금을 풀었습니다.');
+        setTimeout(function () {
+          closeLock();
+          if (lockOnSuccess) lockOnSuccess();
+        }, 320);
+      } else {
+        lockFails++;
+        shakePad();
+        if (lockFails >= MAX_FAILS) startCooldown();
+        else setLockMessage('패턴이 맞지 않습니다. (' + lockFails + '/' + MAX_FAILS + ')');
+      }
+      return;
+    }
+
+    if (lockPurpose === 'set') {
+      lockFirstSeq = lockSeq.slice();
+      lockPurpose = 'confirm';
+      resetLockPad();
+      lockTitle.textContent = '🔒 패턴 확인';
+      setLockMessage('확인을 위해 같은 패턴을 한 번 더 그려 주세요.');
+      return;
+    }
+
+    /* confirm */
+    if (lockHash(lockSeq) === lockHash(lockFirstSeq)) {
+      lockData = { hash: lockHash(lockSeq), len: lockSeq.length };
+      writeStore(KEY_LOCK, lockData);
+      lockPad.classList.add('ok');
+      setLockMessage('패턴을 저장했습니다.');
+      renderLockState();
+      setTimeout(closeLock, 420);
+      showNotice('잠금 패턴을 저장했습니다. 이제 학생 화면에서 돌아오려면 패턴이 필요합니다.');
+    } else {
+      shakePad();
+      lockPurpose = 'set';
+      lockFirstSeq = null;
+      lockTitle.textContent = '🔒 패턴 설정';
+      setLockMessage('두 패턴이 다릅니다. 처음부터 다시 그려 주세요.');
+    }
+  }
+
+  function openLock(purpose, onSuccess) {
+    lockPurpose = purpose;
+    lockOnSuccess = onSuccess || null;
+    lockFirstSeq = null;
+    lockFails = 0;
+    lockCooldownLeft = 0;
+    if (lockCooldownTimer) { clearInterval(lockCooldownTimer); lockCooldownTimer = null; }
+    lockOkBtn.disabled = false;
+    resetLockPad();
+
+    if (purpose === 'verify') {
+      lockTitle.textContent = '🔒 교사용으로 돌아가기';
+      setLockMessage('잠금 패턴을 그려 주세요.');
+    } else {
+      lockTitle.textContent = '🔒 패턴 설정';
+      setLockMessage('새 잠금 패턴을 그려 주세요. (점 ' + MIN_DOTS + '개 이상)');
+    }
+    lockOverlay.classList.add('show');
+    document.getElementById('lockCancel').focus();
+  }
+
+  function closeLock() {
+    lockOverlay.classList.remove('show');
+    lockDrawing = false;
+    if (lockCooldownTimer) { clearInterval(lockCooldownTimer); lockCooldownTimer = null; }
+    lockCooldownLeft = 0;
+    lockOkBtn.disabled = false;
+    resetLockPad();
+  }
+
+  document.getElementById('lockClear').addEventListener('click', function () {
+    resetLockPad();
+    if (lockPurpose === 'verify') setLockMessage('잠금 패턴을 그려 주세요.');
+  });
+  document.getElementById('lockCancel').addEventListener('click', closeLock);
+  lockOkBtn.addEventListener('click', submitLock);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && lockOverlay.classList.contains('show')) closeLock();
+  });
+
+  /* 설정·배포 탭의 잠금 카드 */
+  function renderLockState() {
+    var dot = document.getElementById('lockDot');
+    var state = document.getElementById('lockState');
+    var setBtn = document.getElementById('lockSetBtn');
+    var clrBtn = document.getElementById('lockClearBtn');
+    if (lockData) {
+      dot.textContent = '🔒';
+      state.textContent = '잠금 패턴 설정됨 — 학생 화면에서 돌아오려면 패턴이 필요합니다';
+      setBtn.textContent = '패턴 변경';
+      clrBtn.hidden = false;
+    } else {
+      dot.textContent = '🔓';
+      state.textContent = '잠금 패턴 없음 — 누구나 교사 화면으로 돌아올 수 있습니다';
+      setBtn.textContent = '패턴 설정';
+      clrBtn.hidden = true;
+    }
+  }
+
+  document.getElementById('lockSetBtn').addEventListener('click', function () {
+    if (lockData) {
+      openLock('verify', function () { openLock('set'); });   /* 바꿀 때는 먼저 확인 */
+    } else {
+      openLock('set');
+    }
+  });
+
+  document.getElementById('lockClearBtn').addEventListener('click', function () {
+    openLock('verify', function () {
+      lockData = null;
+      writeStore(KEY_LOCK, null);
+      renderLockState();
+      showNotice('잠금을 해제했습니다.');
+    });
+  });
+
+  function initLock() {
+    var saved = readStore(KEY_LOCK);
+    if (saved && typeof saved.hash === 'string') lockData = saved;
+    renderLockState();
+  }
+
+  /* ══════════════════════════════════════════════════
      11. 시작
      ══════════════════════════════════════════════════ */
   loadRoster();
@@ -3325,7 +3727,11 @@
   showTab('board');
 
   /* 주소 끝에 ?mode=student 를 붙이면 처음부터 학생 화면으로 */
-  setStudentMode(/[?&]mode=student\b/i.test(window.location.search), true);
+  initLock();
+  var urlStudent = /[?&]mode=student\b/i.test(window.location.search);
+  setStudentMode(urlStudent, true);
+  /* 학생용 주소로 연 기기(학생 휴대폰)에서는 돌아가기 버튼 자체를 숨긴다 */
+  if (urlStudent) modeSwitch.hidden = true;
 
   initSetupTab();
   setSyncState('unconfigured');
