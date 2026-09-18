@@ -1438,9 +1438,9 @@
       <div class="clock" id="clockText">—</div>
       <div class="head-actions no-print">
         <span class="sync-badge" id="syncBadge">⚪ 설정 전</span>
-        <span class="student-badge">🧑‍🎓 학생 공개 화면</span>
+        <span class="student-badge">🎓 학생 공개 화면</span>
         <button class="teacher-only" id="authBtn" hidden>🔐 구글 로그인</button>
-        <button id="modeSwitch">🧑‍🎓 학생 화면으로 보기</button>
+        <button id="modeSwitch">🎓 학생 화면으로 보기</button>
       </div>
     </div>
     <div class="head-edit">
@@ -1460,8 +1460,8 @@
     <button class="tab" data-tab="meal" aria-pressed="false">🍚 오늘 급식</button>
     <button class="tab" data-tab="exam" aria-pressed="false">📝 시험 범위</button>
     <button class="tab" data-tab="groups" aria-pressed="false">👥 모둠 뽑기</button>
-    <button class="tab" data-tab="seats" aria-pressed="false">🪑 자리 뽑기</button>
-    <button class="tab" data-tab="cleaning" aria-pressed="false">🧹 청소구역</button>
+    <button class="tab" data-tab="seats" aria-pressed="false">💺 자리 뽑기</button>
+    <button class="tab" data-tab="cleaning" aria-pressed="false">🗑️ 청소구역</button>
     <button class="tab" data-tab="timer" aria-pressed="false">⏱️ 타이머</button>
     <button class="tab" data-tab="presenter" aria-pressed="false">🎤 발표 순서</button>
     <button class="tab teacher-only" data-tab="setup" aria-pressed="false">⚙️ 설정·배포</button>
@@ -1629,11 +1629,11 @@
       </div>
     </section>
 
-    <!-- ══ 🪑 자리 뽑기 ════════════════════ -->
+    <!-- ══ 💺 자리 뽑기 ════════════════════ -->
     <section class="panel" id="panel-seats">
       <div class="panel-scroll">
         <div class="tool-panel">
-          <h3 class="tool-title no-print">🪑 자리 뽑기</h3>
+          <h3 class="tool-title no-print">💺 자리 뽑기</h3>
           <div class="tool-cols">
             <div class="tool-side no-print teacher-only">
               <div class="roster-slot"></div>
@@ -1666,11 +1666,11 @@
       </div>
     </section>
 
-    <!-- ══ 🧹 청소구역 ═════════════════════ -->
+    <!-- ══ 🗑️ 청소구역 ═════════════════════ -->
     <section class="panel" id="panel-cleaning">
       <div class="panel-scroll">
         <div class="tool-panel">
-          <h3 class="tool-title no-print">🧹 청소구역</h3>
+          <h3 class="tool-title no-print">🗑️ 청소구역</h3>
           <div class="tool-cols">
             <div class="tool-side no-print teacher-only">
               <div class="roster-slot"></div>
@@ -1820,7 +1820,7 @@
         </div>
 
         <div class="tool-panel">
-          <h3 class="tool-title">🩺 연결 진단</h3>
+          <h3 class="tool-title">🔍 연결 진단</h3>
           <div class="status-line">
             <span><span class="dot" id="diagDot">⚪</span> <span id="diagState">아직 확인하지 않았습니다</span></span>
             <span>
@@ -2031,6 +2031,7 @@
   var KEY_EXAM_ME  = 'classroom-exam-writer-v1';
   var KEY_MEAL     = 'classroom-meal-v1';
   var KEY_NEIS     = 'classroom-neis-v1';
+  var KEY_SDK      = 'classroom-sdk-v1';
   var PERIOD_COUNT = 7;
   var DAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
   var DAY_SHORT = ['일', '월', '화', '수', '목', '금', '토'];
@@ -2179,7 +2180,7 @@
   function setStudentMode(on, quiet) {
     studentMode = on;
     document.body.classList.toggle('student', on);
-    modeSwitch.textContent = on ? '👩‍🏫 교사용으로 돌아가기' : '🧑‍🎓 학생 화면으로 보기';
+    modeSwitch.textContent = on ? '👩‍🏫 교사용으로 돌아가기' : '🎓 학생 화면으로 보기';
     modeSwitch.setAttribute('aria-pressed', on ? 'true' : 'false');
 
     if (on) {
@@ -3500,7 +3501,7 @@
 
     var label, cls, longText, mark;
     if (state === 'connected') {
-      label = '🟢 공유 중';   cls = 'sync-badge on';  mark = '🟢';
+      label = '🔵 공유 중';   cls = 'sync-badge on';  mark = '🔵';
       longText = '공유 중 — 학생 기기에도 실시간으로 보입니다';
     } else if (state === 'blocked') {
       label = '🔴 인터넷 막힘'; cls = 'sync-badge off'; mark = '🔴';
@@ -3758,6 +3759,32 @@
     }
   ];
 
+  /* ── 통한 방식 기억해 두기 ─────────────────────
+     구형 전자칠판은 최신·호환 방식이 잇따라 실패한 뒤에야 붙습니다.
+     한 번 통한 길을 적어 두었다가 다음부터 곧장 그 길로 갑니다.
+     (기기를 바꾸면 기억이 없으므로 다시 처음부터 찾습니다)
+     ──────────────────────────────────────────── */
+  var SDK_MEMORY_DAYS = 30;          /* 이만큼 지나면 최신 방식을 다시 시험해 봅니다 */
+  var sdkRetriedFromMemory = false;
+
+  function rememberedSdk() {
+    var saved = readStore(KEY_SDK);
+    if (!saved || typeof saved !== 'object') return null;
+    if (!saved.at || Date.now() - saved.at > SDK_MEMORY_DAYS * 86400000) return null;
+    if (saved.kind !== 'compat') return null;
+    var i = Number(saved.index);
+    if (!(i >= 0 && i < SDK_FALLBACKS.length)) return null;
+    return i;
+  }
+
+  function rememberSdk(kind, index) {
+    writeStore(KEY_SDK, { kind: kind, index: index, at: Date.now() });
+  }
+
+  function forgetSdk() {
+    try { localStorage.removeItem(KEY_SDK); } catch (e) { /* 못 지워도 괜찮습니다 */ }
+  }
+
   function loadScript(url) {
     return new Promise(function (resolve, reject) {
       var s = document.createElement('script');
@@ -3810,8 +3837,16 @@
     };
   }
 
-  function startCompat(index) {
+  function startCompat(index, fromMemory) {
     if (index >= SDK_FALLBACKS.length) {
+      /* 기억해 둔 길이 이제 막혔다면, 기억을 지우고 처음부터 다시 찾습니다 */
+      if (fromMemory && !sdkRetriedFromMemory) {
+        sdkRetriedFromMemory = true;
+        forgetSdk();
+        diag('기억해 둔 방식이 이제 통하지 않습니다. 처음부터 다시 찾습니다.');
+        initFirebase();
+        return;
+      }
       diag('② Firebase 코드를 어떤 방식으로도 내려받지 못했습니다.');
       diag('   학교망이 www.gstatic.com 을 막고 있을 가능성이 큽니다.');
       FB.ready = false;
@@ -3842,11 +3877,12 @@
         FB.authMod = compatAuth();
         FB.auth = window.firebase.auth();
         FB.docRef = FB.fs.doc(FB.db, 'classPortal', 'main');
+        rememberSdk('compat', index);
         firebaseReady(step.label);
       })
       .catch(function (e) {
         diag('   실패 — ' + diagReason(e));
-        startCompat(index + 1);
+        startCompat(index + 1, fromMemory);
       });
   }
 
@@ -3864,6 +3900,14 @@
     if (!configFilled()) {
       diag('firebaseConfig가 아직 비어 있습니다.');
       setSyncState('unconfigured');
+      return;
+    }
+
+    /* 지난번에 통한 길이 있으면 곧장 그 길로 (전자칠판 시작이 빨라집니다) */
+    var memory = rememberedSdk();
+    if (memory !== null) {
+      diag('① 지난번에 통한 ' + SDK_FALLBACKS[memory].label + '으로 곧장 붙어 봅니다.');
+      startCompat(memory, true);
       return;
     }
 
@@ -3899,6 +3943,7 @@
 
           FB.docRef = fsMod.doc(FB.db, 'classPortal', 'main');
           FB.auth = authMod.getAuth(app);
+          rememberSdk('module', -1);
           firebaseReady('최신 방식(12.19.0)');
         })
         .catch(function (e) {
@@ -4632,7 +4677,7 @@
 
     if (dot && text) {
       if (FB.state === 'connected') {
-        dot.textContent = '🟢';
+        dot.textContent = '🔵';
         text.textContent = '연결됨' + (FB.mode ? ' — ' + FB.mode : '');
       } else if (FB.state === 'blocked') {
         dot.textContent = '🔴';
@@ -4666,7 +4711,9 @@
 
   document.getElementById('diagRetry').addEventListener('click', function () {
     if (FB.ready) { showNotice('이미 연결되어 있습니다.'); return; }
-    showNotice('다시 연결해 봅니다. 잠시 기다려 주세요.');
+    showNotice('처음부터 다시 연결해 봅니다. 잠시 기다려 주세요.');
+    forgetSdk();                     /* 기억을 지우고 모든 방식을 다시 시험합니다 */
+    sdkRetriedFromMemory = false;
     initFirebase();
   });
 
@@ -4687,7 +4734,7 @@
     var has = !!neisKey();
     var dot = document.getElementById('neisDot');
     var text = document.getElementById('neisState');
-    if (dot) dot.textContent = has ? '🟢' : '⚪';
+    if (dot) dot.textContent = has ? '🔵' : '⚪';
     if (text) {
       text.textContent = has
         ? '인증키를 넣었습니다 — 한 번에 받아오는 개수 제한이 없습니다'
