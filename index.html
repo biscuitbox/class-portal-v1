@@ -257,6 +257,13 @@
   .today-strip .label{ font-weight:800; color:var(--blue); flex:0 0 auto; }
   .today-strip .slot{ color:var(--muted); white-space:nowrap; }
   .today-strip .slot b{ color:var(--ink); font-weight:700; }
+  .today-strip .slot.changed{
+    background:#f3ebff;
+    color:#6a32c9;
+    border-radius:8px;
+    padding:2px 9px;
+  }
+  .today-strip .slot.changed b{ color:#6a32c9; }
   .today-strip .slot.now{
     background:var(--blue-soft);
     color:var(--blue-dark);
@@ -288,6 +295,17 @@
     word-break:keep-all;
   }
   .period .subject.blank{ color:#c3cad4; font-weight:500; }
+  .period.changed .subject{ color:#6a32c9; }
+  .period .chg-tag{
+    flex:0 0 auto;
+    background:#f3ebff;
+    border:2px solid #b48ef0;
+    color:#6a32c9;
+    border-radius:999px;
+    padding:0 10px;
+    font-weight:800;
+    font-size:.75em;
+  }
   .period input{
     flex:1 1 auto;
     min-width:0;
@@ -594,6 +612,10 @@
   table.tt td.slot{ background:#fbfcfe; border:2px solid var(--line); }
   table.tt td.slot.today-col{ background:#f4f8ff; border-color:#bdd3ff; }
   table.tt td.slot.now-cell{ background:#fff3d6; border-color:#f0cd97; box-shadow:0 0 0 3px #ffe6ac inset; }
+  /* 기본 시간표에서 바뀐 수업: 보라색 */
+  table.tt td.slot.changed{ background:#f3ebff; border-color:#b48ef0; }
+  table.tt td.slot.changed .sub{ color:#6a32c9; }
+  .slot .was{ color:#8a6bbf; font-size:13px; font-size:clamp(11px, min(.85vw, 1.6vh), 16px); }
   table.tt th.period-col{
     background:#f7f9fc;
     color:var(--blue);
@@ -924,9 +946,10 @@
     }
 
     /* 한 화면에 7교시가 모두 들어오도록 과목·교사를 한 줄로 */
-    .slot .sub, .slot .tea, .slot .room{ display:inline; }
+    .slot .sub, .slot .tea, .slot .room, .slot .was{ display:inline; }
     .slot .tea{ margin-left:5px; }
     .slot .room{ margin-left:4px; }
+    .slot .was{ margin-left:5px; }
   }
 
   /* 세로가 짧은 모니터에서는 설명 줄을 숨겨 표 자리를 넓힌다 */
@@ -1197,6 +1220,8 @@
   body.student table.tt thead th.today-col{ background:#0f9455; }
   body.student table.tt th.period-col{ color:#0a7a45; }
   body.student table.tt td.slot.today-col{ background:#f0faf4; border-color:#bfe6d1; }
+  body.student table.tt td.slot.changed{ background:#f3ebff; border-color:#b48ef0; }
+  body.student table.tt td.slot.now-cell{ background:#fff3d6; border-color:#f0cd97; }
 
   /* 학생 화면에서 감추는 것: 편집 도구, 모둠 뽑기·발표 순서 탭 */
   body.student .teacher-only{ display:none !important; }
@@ -1525,7 +1550,7 @@
             <button class="btn-danger" id="ttReset">↩️ 기본 시간표로 되돌리기</button>
             <span class="badge-today" id="ttTodayBadge">오늘만 변경된 시간표입니다</span>
           </div>
-          <p class="hint no-print teacher-only" id="ttHint">오늘 요일은 파란색으로, 지금 진행 중인 교시는 노란색으로 표시됩니다.</p>
+          <p class="hint no-print teacher-only" id="ttHint">오늘 요일은 파란색으로, 지금 진행 중인 교시는 노란색으로, 기본 시간표에서 바뀐 수업은 보라색으로 표시됩니다.</p>
           <div class="inline-msg" id="ttMsg"></div>
           <div class="tt-wrap">
             <table class="tt" id="ttTable"></table>
@@ -2406,13 +2431,19 @@
           row.appendChild(input);
         } else {
           var value = (board.periods[index] || '').trim();
+          var changed = false;
           if (!value) {
             /* 비어 있으면 시간표 탭의 오늘 수업을 대신 보여 준다 */
             var cell = todayCell(index);
             if (cell && cell.s) value = cell.s;
+            changed = isChangedCell(index, todayDayIndex());
           }
           var subject = el('span', 'subject' + (value ? '' : ' blank'), value || '—');
           row.appendChild(subject);
+          if (changed) {
+            row.className += ' changed';
+            row.appendChild(el('span', 'chg-tag', '변경'));
+          }
         }
         timetableBox.appendChild(row);
       })(i);
@@ -2675,6 +2706,25 @@
   }
 
   var timetable = defaultTimetable();
+  var BASE_TT = defaultTimetable();   /* 변경 여부를 가릴 기준 */
+
+  function sameCell(a, b) {
+    return (a.s || '') === (b.s || '') && (a.t || '') === (b.t || '') && (a.r || '') === (b.r || '');
+  }
+
+  /* 지금 보이는 칸(오늘만 변경 포함)이 기본 시간표와 다른가 */
+  function isChangedCell(period, day) {
+    if (day < 0) return false;
+    var cell = cellAt(period, day);
+    return !!cell && !sameCell(cell, BASE_TT[period][day]);
+  }
+
+  function wasText(period, day) {
+    var base = BASE_TT[period][day];
+    var cell = cellAt(period, day);
+    if (base.s && base.s === cell.s) return '(원래 ' + (base.t || '다른') + ' 선생님)';
+    return '(원래 ' + (base.s || '수업 없음') + ')';
+  }
   var todayOverride = null;   /* { date:'YYYY-MM-DD', day:0~4, cells:[7] } */
   var ttMode = 'view';        /* 'view' | 'all' | 'today' */
 
@@ -2814,7 +2864,7 @@
       var c = cellAt(i, st.day);
       if (!c || !c.s) continue;
       any = true;
-      var slot = el('span', 'slot' + (st.current === i ? ' now' : ''));
+      var slot = el('span', 'slot' + (isChangedCell(i, st.day) ? ' changed' : '') + (st.current === i ? ' now' : ''));
       slot.appendChild(document.createTextNode((i + 1) + ' '));
       slot.appendChild(el('b', null, c.s));
       strip.appendChild(slot);
@@ -2859,6 +2909,7 @@
             var td = el('td', 'slot');
             if (day === todayIdx) td.className += ' today-col';
             if (day === todayIdx && st.current === period) td.className += ' now-cell';
+            if (isChangedCell(period, day)) td.className += ' changed';
 
             var editable = (ttMode === 'all') || (ttMode === 'today' && day === todayIdx);
 
@@ -2885,6 +2936,7 @@
                   timetable[period][day] = C(subIn.value.trim(), teaIn.value.trim(), cell.r);
                 }
                 saveTimetable();
+                td.classList.toggle('changed', isChangedCell(period, day));
                 renderNowBanner();
                 renderTodayStrip();
                 renderBoardPeriods();
@@ -2903,6 +2955,7 @@
                 td.className += ' blank';
                 td.appendChild(el('div', 'sub', '—'));
               }
+              if (isChangedCell(period, day)) td.appendChild(el('div', 'was', wasText(period, day)));
             }
             tr.appendChild(td);
           })(d);
