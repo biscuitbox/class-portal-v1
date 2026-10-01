@@ -241,38 +241,6 @@
   }
   .empty{ color:var(--muted); padding:14px 2px; }
 
-  /* 안내판 위 오늘 시간표 한 줄 */
-  .today-strip{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    flex-wrap:wrap;
-    background:#fff;
-    border:2px solid var(--line);
-    border-radius:14px;
-    padding:9px 14px;
-    margin-bottom:12px;
-    font-size:17px; font-size:clamp(14px, min(1.1vw, 2vh), 21px);
-  }
-  .today-strip .label{ font-weight:800; color:var(--blue); flex:0 0 auto; }
-  .today-strip .slot{ color:var(--muted); white-space:nowrap; }
-  .today-strip .slot b{ color:var(--ink); font-weight:700; }
-  .today-strip .slot.changed{
-    background:#f3ebff;
-    color:#6a32c9;
-    border-radius:8px;
-    padding:2px 9px;
-  }
-  .today-strip .slot.changed b{ color:#6a32c9; }
-  .today-strip .slot.now{
-    background:var(--blue-soft);
-    color:var(--blue-dark);
-    border-radius:8px;
-    padding:2px 9px;
-    font-weight:800;
-  }
-  .today-strip .slot.now b{ color:var(--blue-dark); }
-
   /* 시간표 */
   .period{
     display:flex;
@@ -776,7 +744,7 @@
       overscroll-behavior:contain;
       padding-right:4px;
     }
-    .toolbar, .today-strip{ flex:0 0 auto; }
+    .toolbar{ flex:0 0 auto; }
     .cards{
       flex:1 1 auto;
       min-height:0;
@@ -1210,10 +1178,7 @@
   /* 학생 화면에서는 강조색도 초록으로 맞춘다 */
   body.student .card h2{ border-bottom-color:#dff3e8; }
   body.student .card h2 .num{ background:#0f9455; }
-  body.student .period .no,
-  body.student .today-strip .label{ color:#0a7a45; }
-  body.student .today-strip .slot.now{ background:#dff3e8; color:#0a7a45; }
-  body.student .today-strip .slot.now b{ color:#0a7a45; }
+  body.student .period .no{ color:#0a7a45; }
   body.student .tool-title{ border-bottom-color:#dff3e8; }
   body.student .now-banner{ background:linear-gradient(135deg,#12a05f,#0a7a45); }
   body.student .now-banner .now-next{ color:#d8f6e6; }
@@ -1505,8 +1470,6 @@
         <button class="btn-danger edit-only" id="clearAll">🗑️ 전체 지우기</button>
         <span class="mode-tag" id="modeTag">보기 전용</span>
       </div>
-
-      <div class="today-strip" id="todayStrip"></div>
 
       <div class="cards">
         <section class="card">
@@ -2404,7 +2367,6 @@
     }
     lastDateKey = key;
     renderNowBanner();
-    renderTodayStrip();
   }
 
   /* ① 오늘의 시간표(직접 입력 칸) */
@@ -2846,32 +2808,6 @@
     }
   }
 
-  /* 안내판 위 한 줄 시간표 */
-  function renderTodayStrip() {
-    var strip = document.getElementById('todayStrip');
-    strip.textContent = '';
-    var st = periodStatus();
-
-    strip.appendChild(el('span', 'label', '오늘 시간표'));
-
-    if (st.weekend) {
-      strip.appendChild(el('span', 'slot', '오늘은 수업이 없습니다'));
-      return;
-    }
-
-    var any = false;
-    for (var i = 0; i < PERIOD_COUNT; i++) {
-      var c = cellAt(i, st.day);
-      if (!c || !c.s) continue;
-      any = true;
-      var slot = el('span', 'slot' + (isChangedCell(i, st.day) ? ' changed' : '') + (st.current === i ? ' now' : ''));
-      slot.appendChild(document.createTextNode((i + 1) + ' '));
-      slot.appendChild(el('b', null, c.s));
-      strip.appendChild(slot);
-    }
-    if (!any) strip.appendChild(el('span', 'slot', '등록된 수업이 없습니다'));
-  }
-
   /* 시간표 표 */
   var ttTable = document.getElementById('ttTable');
 
@@ -2938,7 +2874,6 @@
                 saveTimetable();
                 td.classList.toggle('changed', isChangedCell(period, day));
                 renderNowBanner();
-                renderTodayStrip();
                 renderBoardPeriods();
               };
               subIn.addEventListener('input', apply);
@@ -3022,7 +2957,6 @@
     saveTimetable();
     setTtMode('view');
     renderNowBanner();
-    renderTodayStrip();
     renderBoardPeriods();
     showNotice('기본 시간표로 되돌렸습니다.');
   });
@@ -3718,7 +3652,6 @@
     renderNotices();
     renderEvents();
     renderNowBanner();
-    renderTodayStrip();
     renderTimetableTable();
   }
 
