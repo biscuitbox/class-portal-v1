@@ -1865,6 +1865,181 @@
     }
   }
 
+
+  /* ── ⏰ 시험 시간표 ───────────────────── */
+  .ett-top{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px 16px;
+    margin-bottom:12px;
+  }
+  .ett-title{ margin:0; font-size:clamp(19px, min(1.6vw, 3vh), 30px); }
+  .ett-tools{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .ett-grades{ display:flex; gap:6px; }
+  .ett-grades button{ padding:8px 16px; white-space:nowrap; }
+  .ett-grades button[aria-pressed="true"]{
+    background:var(--blue);
+    border-color:var(--blue);
+    color:var(--on-accent);
+  }
+  #ettPrint{ white-space:nowrap; }
+  .ett-grid{
+    display:grid;
+    grid-template-columns:minmax(118px, .62fr) repeat(3, minmax(0, 1fr));
+    gap:8px;
+  }
+  .ett-h, .ett-day{
+    border-radius:12px;
+    background:var(--surface-3);
+    text-align:center;
+    font-weight:800;
+    padding:8px 6px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    font-size:clamp(15px, min(1.2vw, 2.2vh), 23px);
+  }
+  .ett-h small{ display:block; color:var(--muted); font-weight:700; font-size:.78em; font-variant-numeric:tabular-nums; }
+  .ett-corner{ background:transparent; color:var(--muted); font-size:.85em; }
+  .ett-day{ font-size:clamp(16px, min(1.35vw, 2.5vh), 26px); line-height:1.25; }
+  .ett-day small{ display:block; font-size:.72em; color:var(--muted); font-weight:700; }
+  .ett-day.today{ background:var(--blue); color:var(--on-accent); }
+  .ett-day.today small{ color:inherit; opacity:.85; }
+  .ett-day.done{ opacity:.5; }
+  .ett-cell{
+    position:relative;
+    border:2px solid var(--line);
+    border-radius:14px;
+    background:var(--surface-2);
+    padding:8px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    min-height:clamp(64px, 13vh, 150px);
+    min-width:0;
+  }
+  .ett-subj{
+    font-weight:800;
+    font-size:clamp(20px, min(2.1vw, 3.3vh), 42px);
+    line-height:1.2;
+    word-break:keep-all;
+  }
+  .ett-code{ color:var(--muted); font-weight:700; font-size:.5em; margin-left:6px; vertical-align:middle; }
+  .ett-essay{
+    display:inline-block;
+    margin-top:0;
+    font-size:clamp(12px, min(.9vw, 1.65vh), 16px);
+    font-weight:800;
+    color:var(--chg-ink);
+    background:var(--chg-bg);
+    border:1.5px solid var(--chg-line);
+    border-radius:999px;
+    padding:1px 10px;
+    white-space:nowrap;
+  }
+  .ett-plabel{ display:none; }
+  .ett-cell.study{ background:transparent; border-style:dashed; }
+  .ett-cell.study .ett-subj{ color:var(--faint); font-weight:600; font-size:clamp(17px, min(1.5vw, 2.8vh), 30px); }
+  .ett-cell.today{ background:var(--today-bg); border-color:var(--today-line); }
+  .ett-cell.today.study{ background:transparent; }
+  .ett-cell.now{
+    background:var(--now-bg);
+    border-color:var(--now-ring);
+    box-shadow:0 0 0 3px var(--now-ring) inset;
+  }
+  .ett-cell.now::before{
+    content:"지금";
+    position:absolute;
+    top:6px; left:8px;
+    font-size:clamp(11px, min(.8vw, 1.5vh), 14px);
+    font-weight:800;
+    color:var(--warn-ink);
+    background:var(--warn-bg);
+    border:1.5px solid var(--warn-line);
+    border-radius:999px;
+    padding:0 8px;
+  }
+  .ett-cell.done{ opacity:.42; }
+  .ett-cell.done:not(.study)::after{
+    content:"끝";
+    position:absolute;
+    top:6px; right:8px;
+    font-size:clamp(11px, min(.8vw, 1.5vh), 14px);
+    font-weight:800;
+    color:var(--muted);
+    border:1.5px solid var(--line-strong);
+    border-radius:999px;
+    padding:0 8px;
+  }
+  .ett-lines{ list-style:none; margin:0; padding:0; width:100%; }
+  .ett-lines li{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    padding:2px 0;
+    font-size:clamp(14px, min(1.15vw, 1.95vh), 22px);
+    font-weight:800;
+  }
+  .ett-lines li + li{ border-top:1px dashed var(--line); }
+  .ett-lines .g{ color:var(--muted); font-weight:700; font-size:.82em; white-space:nowrap; }
+  .ett-lines .s.study{ color:var(--faint); font-weight:600; }
+  .ett-lines .ett-essay{ margin-top:0; font-size:.68em; }
+  .ett-meta{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 6px; margin-top:3px; }
+  .ett-allg{ color:var(--muted); font-size:clamp(12px, min(.85vw, 1.6vh), 15px); font-weight:800; }
+  .ett-legend{ flex:1 1 auto; color:var(--muted); font-size:.82em; font-weight:700; word-break:keep-all; }
+  .ett-legend .ett-essay{ font-size:.9em; }
+
+  @media (min-width:1001px) and (min-height:600px){
+    #panel-examtt .panel-scroll{ display:flex; flex-direction:column; }
+    #panel-examtt .now-banner{ flex:0 0 auto; }
+    #panel-examtt .tool-panel{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      padding:clamp(10px, 1.8vh, 20px) 20px clamp(10px, 1.6vh, 18px);
+    }
+    #panel-examtt .ett-top{ flex:0 0 auto; }
+    #panel-examtt .ett-grid{
+      flex:1 1 auto;
+      min-height:0;
+      grid-template-rows:auto repeat(3, minmax(0, 1fr));
+      gap:clamp(5px, .8vh, 8px);
+    }
+    #panel-examtt .ett-cell{ min-height:0; padding:clamp(4px, .8vh, 10px) 10px; }
+    #panel-examtt .ett-top{ margin-bottom:clamp(6px, 1.1vh, 12px); }
+  }
+  @media (min-width:1001px) and (max-width:1500px){
+    .tabs{ gap:3px; }
+    .tab{ padding:8px 10px 12px; font-size:clamp(14px, min(1.05vw, 2vh), 20px); }
+  }
+  @media (max-width:760px){
+    .ett-grid{ grid-template-columns:1fr; }
+    .ett-h, .ett-corner{ display:none; }
+    .ett-day{ margin-top:8px; flex-direction:row; justify-content:center; gap:8px; align-items:baseline; }
+    .ett-day small{ display:inline; }
+    .ett-plabel{
+      display:block;
+      color:var(--muted);
+      font-weight:700;
+      font-size:13px;
+      font-variant-numeric:tabular-nums;
+      margin-bottom:2px;
+    }
+    .ett-cell{ min-height:0; }
+  }
+  @media print{
+    #panel-examtt .ett-cell{ opacity:1 !important; border:1px solid #888; background:#fff !important; box-shadow:none !important; }
+    #panel-examtt .ett-cell::before, #panel-examtt .ett-cell::after{ display:none !important; }
+    #panel-examtt .ett-day, #panel-examtt .ett-h{ background:#fff !important; color:#000 !important; border:1px solid #888; opacity:1 !important; }
+  }
+
 /* ── 인쇄 ─────────────────────────────── */
   @media print{
     html, body{ height:auto; overflow:visible; background:#fff; font-size:13pt; }
@@ -1975,6 +2150,7 @@
     <button class="tab" data-tab="timetable" aria-pressed="false">🗓️ 시간표</button>
     <button class="tab" data-tab="meal" aria-pressed="false">🍚 오늘 급식</button>
     <button class="tab" data-tab="exam" aria-pressed="false">📝 시험 범위</button>
+    <button class="tab" data-tab="examtt" aria-pressed="false">⏰ 시험 시간표</button>
     <button class="tab" data-tab="groups" aria-pressed="false">👥 모둠 뽑기</button>
     <button class="tab" data-tab="seats" aria-pressed="false">💺 자리 뽑기</button>
     <button class="tab" data-tab="cleaning" aria-pressed="false">🗑️ 청소구역</button>
@@ -2118,6 +2294,32 @@
             과목 칸은 누구나 만들고 내용을 적을 수 있습니다. 칸을 지우는 것은 선생님만 할 수 있습니다.
             적은 내용은 잠시 뒤 저절로 저장되어 우리 반 모두에게 보입니다.
           </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ ⏰ 시험 시간표 ══════════════════ -->
+    <section class="panel" id="panel-examtt">
+      <div class="panel-scroll">
+        <div class="now-banner" id="ettBanner">
+          <div class="now-main" id="ettMain">—</div>
+          <div class="now-next" id="ettNext"></div>
+        </div>
+        <div class="tool-panel">
+          <div class="ett-top">
+            <h3 class="ett-title" id="ettTitle">⏰ 시험 시간표</h3>
+            <span class="ett-legend">(숫자) 과목 코드 · <span class="ett-essay">서·논술형</span> 서·논술형 문항 포함</span>
+            <div class="ett-tools">
+              <div class="ett-grades no-print" role="group" aria-label="학년 고르기" id="ettGrades">
+                <button type="button" data-g="1">1학년</button>
+                <button type="button" data-g="2">2학년</button>
+                <button type="button" data-g="3">3학년</button>
+                <button type="button" data-g="all">전체</button>
+              </div>
+              <button type="button" class="no-print teacher-only" id="ettPrint">🖨️ 인쇄하기</button>
+            </div>
+          </div>
+          <div class="ett-grid" id="ettGrid"></div>
         </div>
       </div>
     </section>
@@ -5624,6 +5826,228 @@
     showNotice('이 브라우저에서는 저장 기능을 쓸 수 없습니다. 시크릿 모드라면 일반 창에서 열어 주세요.');
   }
 })();
+</script>
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     ⏰ 시험 시간표
+     ▼ 다음 시험 때는 이 EXAM_TIMETABLE 부분만 고치면 됩니다 ▼
+       · p 의 한 줄 = 한 교시, 안의 세 칸 = [1학년, 2학년, 3학년]
+       · 과목(코드번호), 맨 뒤에 * 를 붙이면 '서·논술형 포함'
+     ═══════════════════════════════════════════════════════════ */
+  var EXAM_TIMETABLE = {
+    title: '2026학년도 2학기 1회고사',
+    periods: [
+      { name: '1교시', start: '09:00', end: '09:45' },
+      { name: '2교시', start: '10:00', end: '10:45' },
+      { name: '3교시', start: '11:00', end: '11:45' }
+    ],
+    days: [
+      { date: '2026-10-19', p: [
+          ['자습',      '역사(34)*', '역사(34)*'],
+          ['자습',      '자습',      '도덕(22)'],
+          ['국어(21)*', '국어(21)*', '국어(21)*'] ] },
+      { date: '2026-10-20', p: [
+          ['영어(31)*', '영어(31)*', '영어(31)*'],
+          ['자습',      '자습',      '자습'],
+          ['수학(24)*', '수학(24)*', '수학(24)*'] ] },
+      { date: '2026-10-21', p: [
+          ['사회(23)*', '자습',      '사회(23)*'],
+          ['자습',      '자습',      '자습'],
+          ['과학(26)*', '과학(26)*', '과학(26)*'] ] }
+    ]
+  };
+  /* ▲ 여기까지 ▲ */
+
+  (function () {
+    var T = EXAM_TIMETABLE;
+    var KEY = 'classroom-ett-grade-v1';
+    var DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+    var grid = document.getElementById('ettGrid');
+    if (!grid) return;
+
+    function parse(spec) {
+      var s = String(spec || '').trim();
+      if (!s || s === '자습') return { study: true, name: '자습', key: '자습' };
+      var essay = /\*\s*$/.test(s);
+      s = s.replace(/\*\s*$/, '').trim();
+      var m = /^(.+?)\s*\((\d+)\)$/.exec(s);
+      return { study: false, name: m ? m[1] : s, code: m ? m[2] : '', essay: essay, key: s + (essay ? '*' : '') };
+    }
+    function el(tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    }
+    function ymd(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function dateOf(str) { var p = str.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+    function at(dayStr, hm) { var d = dateOf(dayStr), t = hm.split(':'); d.setHours(+t[0], +t[1], 0, 0); return d; }
+    function dayLabel(str) { var d = dateOf(str); return (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; }
+    function wd(str) { return DAYS[dateOf(str).getDay()]; }
+
+    /* 학년: 저장한 값 → 학급 이름의 'n학년' → 2학년 */
+    function readGrade() {
+      try { var s = localStorage.getItem(KEY); if (/^(1|2|3|all)$/.test(s)) return s; } catch (e) {}
+      var name = (document.getElementById('classNameView') || {}).textContent || '';
+      var m = /([123])\s*학년/.exec(name);
+      return m ? m[1] : '2';
+    }
+    var grade = readGrade();
+
+    /* 이 학년(전체면 어느 학년이든)이 실제 시험을 보는 교시 */
+    function isExam(day, pi) {
+      var row = day.p[pi] || [];
+      if (grade === 'all') return row.some(function (x) { return !parse(x).study; });
+      return !parse(row[+grade - 1]).study;
+    }
+    function subjText(day, pi) {
+      var row = day.p[pi] || [];
+      if (grade !== 'all') return parse(row[+grade - 1]).name;
+      var names = [];
+      row.forEach(function (x) { var p = parse(x); if (!p.study && names.indexOf(p.name) === -1) names.push(p.name); });
+      return names.join('·');
+    }
+
+    function renderGrid(now) {
+      grid.textContent = '';
+      var today = ymd(now);
+      grid.appendChild(el('div', 'ett-h ett-corner', '날짜'));
+      T.periods.forEach(function (p) {
+        var h = el('div', 'ett-h', p.name);
+        h.appendChild(el('small', null, p.start + '~' + p.end));
+        grid.appendChild(h);
+      });
+
+      T.days.forEach(function (day) {
+        var dayDone = day.date < today;
+        var dh = el('div', 'ett-day' + (day.date === today ? ' today' : '') + (dayDone ? ' done' : ''));
+        dh.appendChild(document.createTextNode(dayLabel(day.date)));
+        dh.appendChild(el('small', null, '(' + wd(day.date) + ')' + (day.date === today ? ' 오늘' : '')));
+        grid.appendChild(dh);
+
+        T.periods.forEach(function (per, pi) {
+          var row = day.p[pi] || [];
+          var start = at(day.date, per.start), end = at(day.date, per.end);
+          var cell = el('div', 'ett-cell');
+          if (day.date === today) cell.className += ' today';
+          if (now >= end) cell.className += ' done';
+          else if (now >= start) cell.className += ' now';
+          cell.appendChild(el('span', 'ett-plabel', per.name + ' ' + per.start + '~' + per.end));
+
+          if (grade !== 'all') {
+            fillOne(cell, parse(row[+grade - 1]));
+          } else {
+            var groups = [];
+            row.forEach(function (x, gi) {
+              var p = parse(x), g = null;
+              groups.forEach(function (k) { if (k.p.key === p.key) g = k; });
+              if (g) g.grades.push(gi + 1); else groups.push({ p: p, grades: [gi + 1] });
+            });
+            if (groups.length === 1) {
+              fillOne(cell, groups[0].p, '전 학년');
+            } else {
+              var ul = el('ul', 'ett-lines');
+              groups.forEach(function (k) {
+                var li = el('li');
+                li.appendChild(el('span', 'g', k.grades.join('·') + '학년'));
+                var s = el('span', 's' + (k.p.study ? ' study' : ''), k.p.name);
+                if (k.p.code) s.appendChild(el('span', 'ett-code', k.p.code));
+                li.appendChild(s);
+                if (k.p.essay) li.appendChild(el('span', 'ett-essay', '서·논술형'));
+                ul.appendChild(li);
+              });
+              cell.appendChild(ul);
+            }
+          }
+          if (grade !== 'all' ? parse(row[+grade - 1]).study : row.every(function (x) { return parse(x).study; })) {
+            cell.className += ' study';
+          }
+          grid.appendChild(cell);
+        });
+      });
+    }
+
+    function fillOne(cell, p, tag) {
+      var s = el('div', 'ett-subj', p.name);
+      if (p.code) s.appendChild(el('span', 'ett-code', '(' + p.code + ')'));
+      cell.appendChild(s);
+      if (tag || p.essay) {
+        var meta = el('div', 'ett-meta');
+        if (tag) meta.appendChild(el('span', 'ett-allg', tag));
+        if (p.essay) meta.appendChild(el('span', 'ett-essay', '서·논술형 포함'));
+        cell.appendChild(meta);
+      }
+    }
+
+    function renderBanner(now) {
+      var main = document.getElementById('ettMain');
+      var next = document.getElementById('ettNext');
+      var who = grade === 'all' ? '' : grade + '학년 ';
+      var list = [];
+      T.days.forEach(function (day, di) {
+        T.periods.forEach(function (per, pi) {
+          list.push({ day: day, per: per, pi: pi, start: at(day.date, per.start), end: at(day.date, per.end), exam: isExam(day, pi) });
+        });
+      });
+      var exams = list.filter(function (x) { return x.exam; });
+      if (!exams.length) { main.textContent = T.title; next.textContent = ''; return; }
+
+      var today = ymd(now);
+      var cur = null, upcoming = null;
+      list.forEach(function (x) { if (now >= x.start && now < x.end) cur = x; });
+      exams.forEach(function (x) { if (!upcoming && x.start > now) upcoming = x; });
+      function desc(x) {
+        return dayLabel(x.day.date) + '(' + wd(x.day.date) + ') ' + x.per.name + ' ' + subjText(x.day, x.pi) + ' · ' + x.per.start + ' 시작';
+      }
+      function dday(x) {
+        var a = dateOf(today), b = dateOf(x.day.date);
+        return Math.round((b - a) / 86400000);
+      }
+
+      if (cur && cur.exam) {
+        main.textContent = '지금 ' + cur.per.name + ' ' + subjText(cur.day, cur.pi) + ' 시험 중 · ' + cur.per.end + ' 끝';
+      } else if (cur) {
+        main.textContent = '지금 ' + cur.per.name + '는 ' + who + '자습 시간입니다 (' + cur.per.start + '~' + cur.per.end + ')';
+      } else if (!upcoming) {
+        main.textContent = T.title + '가 모두 끝났습니다. 수고 많았어요!';
+      } else if (upcoming.day.date === today) {
+        var started = exams.some(function (x) { return x.day.date === today && x.end <= now; }) ||
+          list.some(function (x) { return x.day.date === today && x.end <= now; });
+        main.textContent = started ? '쉬는 시간입니다' : '오늘은 ' + T.title + ' 날입니다 · D-DAY';
+      } else {
+        var doneToday = exams.some(function (x) { return x.day.date === today; });
+        var n = dday(upcoming);
+        main.textContent = doneToday
+          ? '오늘 시험은 모두 끝났습니다. 수고했어요!'
+          : (exams[0].start > now ? T.title + '까지 D-' + n : '다음 시험까지 D-' + n);
+      }
+      next.textContent = upcoming ? (who ? who : '') + '다음 시험: ' + desc(upcoming) : '';
+    }
+
+    function render() {
+      var now = new Date();
+      document.getElementById('ettTitle').textContent = '⏰ ' + T.title + ' 시간표';
+      Array.prototype.forEach.call(document.querySelectorAll('#ettGrades button'), function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-g') === grade ? 'true' : 'false');
+      });
+      renderGrid(now);
+      renderBanner(now);
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('#ettGrades button'), function (b) {
+      b.addEventListener('click', function () {
+        grade = b.getAttribute('data-g');
+        try { localStorage.setItem(KEY, grade); } catch (e) {}
+        render();
+      });
+    });
+    document.getElementById('ettPrint').addEventListener('click', function () { window.print(); });
+
+    render();
+    setInterval(render, 20000);
+  })();
 </script>
 <script>
   /* ── 화면 테마 전환 (칠판 ↔ 종이) ── */
