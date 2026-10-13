@@ -1852,6 +1852,7 @@
   }
   html[data-theme="paper"] body.student .now-banner,
   html[data-theme="paper"] body.student .meal-today{ box-shadow:0 3px 0 var(--stu-dark), 0 10px 20px var(--stu-shadow); }
+  html[data-theme="paper"] body.student .now-banner .now-next{ color:#dcf3e5; }
 
   /* ── 좁은 화면 ─────────────────────────── */
   @media (max-width:1000px){
@@ -1998,22 +1999,63 @@
   @media (min-width:1001px) and (min-height:600px){
     #panel-examtt .panel-scroll{ display:flex; flex-direction:column; }
     #panel-examtt .now-banner{ flex:0 0 auto; }
+    /* 남는 높이는 채우되, 내용보다 작아지지는 않게(모자라면 칸 안에서 스크롤) */
     #panel-examtt .tool-panel{
-      flex:1 1 auto;
-      min-height:0;
+      flex:1 0 auto;
       display:flex;
       flex-direction:column;
       padding:clamp(10px, 1.8vh, 20px) 20px clamp(10px, 1.6vh, 18px);
     }
     #panel-examtt .ett-top{ flex:0 0 auto; }
     #panel-examtt .ett-grid{
-      flex:1 1 auto;
-      min-height:0;
-      grid-template-rows:auto repeat(3, minmax(0, 1fr));
+      flex:1 0 auto;
+      grid-template-rows:auto repeat(3, minmax(min-content, 1fr));
       gap:clamp(5px, .8vh, 8px);
     }
     #panel-examtt .ett-cell{ min-height:0; padding:clamp(4px, .8vh, 10px) 10px; }
     #panel-examtt .ett-top{ margin-bottom:clamp(6px, 1.1vh, 12px); }
+  }
+  /* 세로가 짧은 화면(전자칠판·배율 높은 TV): 칸 안 내용을 한 줄로 */
+  @media (min-width:1001px) and (min-height:600px) and (max-height:800px){
+    #panel-examtt .now-banner{ padding:6px 16px; margin-bottom:8px; gap:4px 18px; }
+    #panel-examtt .now-banner .now-main{ font-size:clamp(16px, 3vh, 24px); }
+    #panel-examtt .now-banner .now-next{ font-size:clamp(13px, 2.2vh, 18px); }
+    #panel-examtt .tool-panel{ padding:8px 14px 10px; }
+    #panel-examtt .ett-top{ margin-bottom:6px; gap:6px 12px; }
+    #panel-examtt .ett-title{ font-size:clamp(16px, 2.8vh, 22px); }
+    #panel-examtt .ett-grades button, #panel-examtt #ettPrint{ padding:5px 12px; }
+    #panel-examtt .ett-h, #panel-examtt .ett-day{
+      flex-direction:row;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-items:baseline;
+      align-content:center;
+      gap:0 6px;
+      padding:4px 6px;
+    }
+    #panel-examtt .ett-h small, #panel-examtt .ett-day small{ display:inline; }
+    #panel-examtt .ett-cell{
+      flex-direction:row;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-items:center;
+      gap:2px 10px;
+      padding:4px 8px;
+    }
+    #panel-examtt .ett-subj{ font-size:clamp(18px, 3.5vh, 30px); }
+    #panel-examtt .ett-cell.study .ett-subj{ font-size:clamp(15px, 2.8vh, 24px); }
+    #panel-examtt .ett-meta{ margin-top:0; }
+    #panel-examtt .ett-cell.now::before{ position:static; order:-1; }
+    #panel-examtt .ett-cell.done:not(.study)::after{ position:static; order:9; }
+    #panel-examtt .ett-lines{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:2px 16px;
+      width:auto;
+    }
+    #panel-examtt .ett-lines li{ padding:0; font-size:clamp(14px, 2.4vh, 19px); }
+    #panel-examtt .ett-lines li + li{ border-top:none; }
   }
   @media (min-width:1001px) and (max-width:1500px){
     .tabs{ gap:3px; }
