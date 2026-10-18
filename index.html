@@ -2082,6 +2082,45 @@
     #panel-examtt .ett-day, #panel-examtt .ett-h{ background:#fff !important; color:#000 !important; border:1px solid #888; opacity:1 !important; }
   }
 
+  /* ── 알림장 순서 바꾸기 (손잡이를 끌어서 놓기) ── */
+  .drag-handle{
+    display:none;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:center;
+    width:1.9em;
+    height:1.9em;
+    padding:0;
+    border-radius:9px;
+    border:2px dashed var(--line-strong);
+    background:transparent;
+    color:var(--muted);
+    font-size:1em;
+    line-height:1;
+    cursor:grab;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  body.edit .drag-handle{ display:inline-flex; }
+  .drag-handle:hover, .drag-handle:focus-visible{ color:var(--ink); border-color:var(--blue); }
+  .notice-item.dragging{
+    position:relative;
+    z-index:2;
+    margin:0 -8px;
+    padding-left:8px;
+    padding-right:8px;
+    border-radius:12px;
+    border-bottom-color:transparent;
+    background:var(--surface-solid);
+    box-shadow:0 12px 26px var(--pop-shadow-c), 0 0 0 2px var(--blue);
+  }
+  .notice-item.dragging .drag-handle{ cursor:grabbing; color:var(--blue); border-style:solid; border-color:var(--blue); }
+  body.is-dragging, body.is-dragging *{ cursor:grabbing !important; user-select:none !important; -webkit-user-select:none !important; }
+  .notice-item.moved{ animation:noticeMoved .7s ease; }
+  @keyframes noticeMoved{ 0%{ background:var(--blue-soft); } 100%{ background:transparent; } }
+  @media print{ .drag-handle{ display:none !important; } }
+
 /* ── 인쇄 ─────────────────────────────── */
   @media print{
     html, body{ height:auto; overflow:visible; background:#fff; font-size:13pt; }
@@ -3195,6 +3234,21 @@
     }
     board.notices.forEach(function (item) {
       var li = el('li', 'notice-item' + (item.done ? ' done' : ''));
+      li.setAttribute('data-id', item.id);
+
+      /* 편집 모드에서만 보이는 순서 손잡이: 끌어서 놓거나, ↑↓ 키로 옮긴다 */
+      var handle = el('button', 'drag-handle', '⠿');
+      handle.type = 'button';
+      handle.title = '끌어서 순서 바꾸기 (↑↓ 키로도 옮길 수 있어요)';
+      handle.setAttribute('aria-label', item.text + ' — 순서 옮기기. 위아래 화살표 키로 옮깁니다');
+      handle.addEventListener('pointerdown', function (e) { startNoticeDrag(e, li, handle); });
+      handle.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          moveNotice(item.id, e.key === 'ArrowUp' ? -1 : 1);
+        }
+      });
+      li.appendChild(handle);
 
       var check = document.createElement('input');
       check.type = 'checkbox';
@@ -3228,6 +3282,143 @@
 
       noticeList.appendChild(li);
     });
+  }
+
+  /* ── 알림 순서 바꾸기 ─────────────────────────────
+     마우스·터치(전자칠판)·펜 모두 되도록 Pointer 이벤트로 직접 처리한다.
+     놓는 순간 한 번만 저장(로그인 상태면 모두에게 공유). */
+  var noticeDrag = null;
+
+  function noticeOrderInList() {
+    return Array.prototype.map.call(noticeList.querySelectorAll('li[data-id]'), function (n) {
+      return n.getAttribute('data-id');
+    });
+  }
+
+  function applyNoticeOrder(order) {
+    var byId = {};
+    board.notices.forEach(function (n) { byId[n.id] = n; });
+    var next = [];
+    order.forEach(function (id) { if (byId[id] && next.indexOf(byId[id]) === -1) next.push(byId[id]); });
+    board.notices.forEach(function (n) { if (next.indexOf(n) === -1) next.push(n); });
+    board.notices = next;
+  }
+
+  function markMoved(id, focusHandle) {
+    Array.prototype.forEach.call(noticeList.querySelectorAll('li[data-id]'), function (n) {
+      if (n.getAttribute('data-id') !== id) return;
+      n.classList.add('moved');
+      setTimeout(function () { n.classList.remove('moved'); }, 750);
+      if (focusHandle) {
+        var hd = n.querySelector('.drag-handle');
+        if (hd) hd.focus();
+      }
+    });
+  }
+
+  function startNoticeDrag(e, li, handle) {
+    if (!editMode || noticeDrag) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    noticeDrag = {
+      li: li,
+      handle: handle,
+      id: li.getAttribute('data-id'),
+      pointerId: e.pointerId,
+      before: noticeOrderInList().join('|'),
+      lastY: e.clientY,
+      raf: 0
+    };
+    /* 항목이 목록 안에서 자리를 옮겨도 끊기지 않도록, 움직이지 않는 목록(ul)이 포인터를 붙잡는다 */
+    try { noticeList.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+    li.classList.add('dragging');
+    document.body.classList.add('is-dragging');
+    noticeList.addEventListener('pointermove', onNoticeDragMove);
+    noticeList.addEventListener('pointerup', endNoticeDrag);
+    noticeList.addEventListener('pointercancel', endNoticeDrag);
+    noticeList.addEventListener('lostpointercapture', endNoticeDrag);
+    noticeDrag.raf = requestAnimationFrame(noticeDragTick);
+  }
+
+  function onNoticeDragMove(e) {
+    var d = noticeDrag;
+    if (!d || e.pointerId !== d.pointerId) return;
+    e.preventDefault();
+    d.lastY = e.clientY;
+    placeDraggedNotice(d);
+  }
+
+  /* 손가락 위치보다 아래에 있는 첫 항목 앞으로 옮긴다 */
+  function placeDraggedNotice(d) {
+    var y = d.lastY;
+    var others = Array.prototype.filter.call(noticeList.querySelectorAll('li[data-id]'), function (n) {
+      return n !== d.li;
+    });
+    var target = null;
+    for (var i = 0; i < others.length; i++) {
+      var r = others[i].getBoundingClientRect();
+      if (y < r.top + r.height / 2) { target = others[i]; break; }
+    }
+    if (target) {
+      if (d.li.nextElementSibling !== target) noticeList.insertBefore(d.li, target);
+    } else if (noticeList.lastElementChild !== d.li) {
+      noticeList.appendChild(d.li);
+    }
+  }
+
+  /* 목록 위·아래 끝(또는 바깥)에 손가락을 대고 있으면 계속 저절로 스크롤 — 화면이 낮은 전자칠판용 */
+  function noticeDragTick() {
+    var d = noticeDrag;
+    if (!d) return;
+    var box = noticeList.getBoundingClientRect();
+    var edge = Math.max(14, Math.min(32, box.height / 4));
+    var step = 0;
+    if (d.lastY < box.top + edge) step = -Math.min(14, Math.ceil((box.top + edge - d.lastY) / edge * 6));
+    else if (d.lastY > box.bottom - edge) step = Math.min(14, Math.ceil((d.lastY - (box.bottom - edge)) / edge * 6));
+    if (step) {
+      var before = noticeList.scrollTop;
+      noticeList.scrollTop = before + step;
+      if (noticeList.scrollTop !== before) placeDraggedNotice(d);
+    }
+    d.raf = requestAnimationFrame(noticeDragTick);
+  }
+
+  function endNoticeDrag(e) {
+    var d = noticeDrag;
+    if (!d || (e && e.pointerId !== undefined && e.pointerId !== d.pointerId)) return;
+    noticeDrag = null;
+    cancelAnimationFrame(d.raf);
+    noticeList.removeEventListener('pointermove', onNoticeDragMove);
+    noticeList.removeEventListener('pointerup', endNoticeDrag);
+    noticeList.removeEventListener('pointercancel', endNoticeDrag);
+    noticeList.removeEventListener('lostpointercapture', endNoticeDrag);
+    try { noticeList.releasePointerCapture(d.pointerId); } catch (err) { /* 무시 */ }
+    d.li.classList.remove('dragging');
+    document.body.classList.remove('is-dragging');
+
+    var order = noticeOrderInList();
+    if (order.join('|') !== d.before) {
+      applyNoticeOrder(order);
+      if (FB.pendingRemote) FB.pendingRemote = null;   /* 끌던 사이 온 내용보다 방금 바꾼 순서를 우선 */
+      saveBoard();
+      renderNotices();
+      markMoved(d.id, false);
+    } else if (FB.pendingRemote) {
+      applyRemote(FB.pendingRemote);                    /* 순서를 안 바꿨으면 미뤄 둔 내용을 반영 */
+    }
+  }
+
+  function moveNotice(id, delta) {
+    var i = -1;
+    board.notices.forEach(function (n, k) { if (n.id === id) i = k; });
+    var j = i + delta;
+    if (i < 0 || j < 0 || j >= board.notices.length) return;
+    var t = board.notices[i];
+    board.notices[i] = board.notices[j];
+    board.notices[j] = t;
+    saveBoard();
+    renderNotices();
+    markMoved(id, true);
   }
 
   function addNotice() {
@@ -4368,8 +4559,8 @@
   /* 서버에서 받은 내용을 화면에 반영 */
   function applyRemote(d) {
     var ae = document.activeElement;
-    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) {
-      FB.pendingRemote = d;     /* 입력 중에는 화면을 갈아엎지 않는다 */
+    if ((ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) || noticeDrag) {
+      FB.pendingRemote = d;     /* 입력 중·순서 끄는 중에는 화면을 갈아엎지 않는다 */
       return;
     }
     FB.pendingRemote = null;
