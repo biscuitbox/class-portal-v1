@@ -2236,6 +2236,18 @@
   #ntList .drag-handle{ display:inline-flex; }
   /* 끄는 동안 브라우저의 '스크롤 위치 붙잡기'가 자동 스크롤을 되돌리지 않도록 */
   #ntList, #noticeList{ overflow-anchor:none; }
+  /* 학생 화면: 알림을 2단으로 (왼쪽→오른쪽, 위→아래 순서) */
+  body.student .nt-list{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:10px 12px;
+    align-content:start;
+  }
+  body.student .nt-list .nt-item{ margin-bottom:0; }
+  body.student .nt-list .empty{ grid-column:1 / -1; }
+  @media (max-width:760px){
+    body.student .nt-list{ grid-template-columns:minmax(0, 1fr); }
+  }
 
   .nt-pin{
     flex:0 0 auto;
@@ -3810,7 +3822,7 @@
 
   /* 알림 목록의 한 줄 */
   function ntRow(item, today) {
-    var onBoard = noticeOnBoard(item, today);
+    var onBoard = !studentMode && noticeOnBoard(item, today);   /* 학생 화면에는 안내판 표시 여부를 안 보여 줌 */
     var li = el('li', 'nt-item' + (item.done ? ' done' : '') + (onBoard ? ' on-board' : ''));
     li.setAttribute('data-id', item.id);
 
@@ -3842,7 +3854,7 @@
 
     var meta = el('div', 'nt-meta');
     if (onBoard) meta.appendChild(el('span', 'nt-badge on', '📌 안내판에 표시 중'));
-    else if (item.show && noticeNotYet(item, today)) meta.appendChild(el('span', 'nt-badge wait', '⏳ ' + shortDate(item.from) + '부터 표시'));
+    else if (!studentMode && item.show && noticeNotYet(item, today)) meta.appendChild(el('span', 'nt-badge wait', '⏳ ' + shortDate(item.from) + '부터 표시'));
     var range = noticeRangeText(item);
     if (range) meta.appendChild(el('span', 'nt-badge', '📅 ' + range));
     if (item.done) meta.appendChild(el('span', 'nt-badge done', '✔ 완료'));
