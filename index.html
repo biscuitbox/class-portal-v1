@@ -2121,6 +2121,259 @@
   @keyframes noticeMoved{ 0%{ background:var(--blue-soft); } 100%{ background:transparent; } }
   @media print{ .drag-handle{ display:none !important; } }
 
+  /* ── 알림 분류 색 ── */
+  :root, html[data-theme="paper"]{
+    --cat-hw:#2a55b8;     --cat-hw-bg:#e8efff;
+    --cat-prep:#9a5b00;   --cat-prep-bg:#fff1d6;
+    --cat-submit:#b42357; --cat-submit-bg:#fde6ee;
+    --cat-event:#1f7a4d;  --cat-event-bg:#e3f5ea;
+    --cat-etc:#5d6675;    --cat-etc-bg:#eceae4;
+  }
+  html[data-theme="chalk"]{
+    --cat-hw:#9fd3f2;     --cat-hw-bg:rgba(159,211,242,.16);
+    --cat-prep:#f3d36b;   --cat-prep-bg:rgba(243,211,107,.16);
+    --cat-submit:#f7b2c1; --cat-submit-bg:rgba(247,178,193,.16);
+    --cat-event:#8fdcaa;  --cat-event-bg:rgba(143,220,170,.16);
+    --cat-etc:#d6d1c2;    --cat-etc-bg:rgba(242,239,227,.10);
+  }
+  .cat-hw{ --c:var(--cat-hw); --cb:var(--cat-hw-bg); }
+  .cat-prep{ --c:var(--cat-prep); --cb:var(--cat-prep-bg); }
+  .cat-submit{ --c:var(--cat-submit); --cb:var(--cat-submit-bg); }
+  .cat-event{ --c:var(--cat-event); --cb:var(--cat-event-bg); }
+  .cat-etc{ --c:var(--cat-etc); --cb:var(--cat-etc-bg); }
+  .cat-tag{
+    flex:0 0 auto;
+    display:inline-block;
+    font-size:.68em;
+    font-weight:800;
+    line-height:1.25;
+    padding:3px 10px;
+    border-radius:999px;
+    border:2px solid var(--c);
+    color:var(--c);
+    background:var(--cb);
+    white-space:nowrap;
+  }
+  .notice-item .cat-tag{ font-size:clamp(12px, min(.95vw, 1.75vh), 18px); }
+
+  /* 안내판 카드 머리의 '전체 n개 ›' */
+  .card h2 .card-more{
+    margin-left:auto;
+    flex:0 0 auto;
+    font-size:.55em;
+    padding:5px 13px;
+    border-radius:999px;
+    white-space:nowrap;
+    color:var(--muted);
+  }
+  .card h2 .card-more:hover{ color:var(--ink); }
+
+  /* ── 📒 알림장 탭 ── */
+  .nt-top{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px 14px;
+    padding-bottom:10px;
+    margin-bottom:12px;
+    border-bottom:3px solid var(--blue-soft);
+  }
+  body.student .nt-top{ border-bottom-color:var(--stu-soft); }
+  .nt-top .tool-title{ flex:1 1 auto; margin:0; padding:0; border:0; }
+  .nt-views{ display:flex; gap:6px; }
+  .nt-views button{ padding:8px 16px; white-space:nowrap; }
+  .nt-views button b{ margin-left:4px; }
+  .nt-views button[aria-pressed="true"]{ background:var(--blue); border-color:var(--blue); color:var(--on-accent); }
+
+  .nt-cols{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) minmax(280px, 30%);
+    gap:20px;
+  }
+  body.student .nt-cols{ grid-template-columns:minmax(0, 1fr); }
+  .nt-main{ min-width:0; }
+  .nt-side{ min-width:0; border-left:2px solid var(--line); padding-left:18px; }
+  .nt-side .side-label{ margin-top:12px; }
+  .nt-side .side-label:first-child{ margin-top:0; }
+  .nt-side .side-label small{ font-weight:500; color:var(--faint); margin-left:4px; }
+  .nt-side .hint{ margin:6px 0 0; }
+
+  .nt-bar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px; }
+  .nt-bar [hidden]{ display:none !important; }
+  .nt-bar button{ padding:6px 14px; font-size:.85em; }
+  .nt-filter{ display:flex; flex-wrap:wrap; gap:6px; flex:1 1 auto; }
+  .nt-chip{ border-radius:999px; }
+  .nt-chip[aria-pressed="true"]{
+    background:var(--cb, var(--blue));
+    border-color:var(--c, var(--blue));
+    color:var(--c, var(--on-accent));
+  }
+  #ntHint{ margin:0 0 8px; }
+
+  .nt-list .empty{ padding:14px 4px; }
+  .nt-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:9px 12px;
+    margin-bottom:8px;
+    border:2px solid var(--line);
+    border-radius:14px;
+    background:var(--surface-2);
+  }
+  .nt-item:last-child{ margin-bottom:0; }
+  .nt-item.on-board{ border-color:var(--blue); background:var(--blue-soft); }
+  .nt-item.archived{ opacity:.85; }
+  .nt-item.dragging{
+    position:relative;
+    z-index:2;
+    background:var(--surface-solid);
+    border-color:var(--blue);
+    box-shadow:0 12px 26px var(--pop-shadow-c);
+  }
+  .nt-item.dragging .drag-handle{ cursor:grabbing; color:var(--blue); border-style:solid; border-color:var(--blue); }
+  .nt-item.moved{ animation:noticeMoved .7s ease; }
+  #ntList .drag-handle{ display:inline-flex; }
+  /* 끄는 동안 브라우저의 '스크롤 위치 붙잡기'가 자동 스크롤을 되돌리지 않도록 */
+  #ntList, #noticeList{ overflow-anchor:none; }
+
+  .nt-pin{
+    flex:0 0 auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1px;
+    font-size:.66em;
+    font-weight:800;
+    color:var(--muted);
+    cursor:pointer;
+    user-select:none;
+  }
+  .nt-pin input, .nt-showopt input{
+    width:24px; width:clamp(20px, 2.6vh, 30px);
+    height:24px; height:clamp(20px, 2.6vh, 30px);
+    margin:0;
+    accent-color:var(--blue);
+    cursor:pointer;
+  }
+  .nt-body{ flex:1 1 auto; min-width:0; }
+  .nt-line{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; }
+  .nt-text{
+    font-size:19px; font-size:clamp(16px, min(1.3vw, 2.4vh), 26px);
+    font-weight:700;
+    word-break:keep-all;
+    overflow-wrap:anywhere;
+  }
+  .nt-item.done .nt-text{ text-decoration:line-through; text-decoration-thickness:3px; color:var(--faint); }
+  .nt-meta{ display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+  .nt-badge{
+    font-size:.74em;
+    font-weight:700;
+    padding:2px 10px;
+    border-radius:999px;
+    background:var(--surface-3);
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .nt-badge.on{ background:var(--blue); color:var(--on-accent); }
+  .nt-badge.wait{ background:var(--pin-bg); color:var(--pin-ink); }
+  .nt-badge.done{ background:var(--ok-soft); color:var(--ok-dark); }
+  .nt-acts{ flex:0 0 auto; display:flex; gap:6px; }
+  .nt-acts button{ padding:6px 12px; font-size:.82em; }
+  .nt-acts .danger{ color:var(--danger); border-color:var(--danger-line); }
+  .nt-acts .danger:hover{ background:var(--danger-hover); }
+
+  /* 고치는 줄·추가 칸 */
+  .nt-item.editing{ border-color:var(--blue); background:var(--surface-solid); }
+  .nt-edit{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .nt-field, .nt-dates input{
+    width:100%;
+    font:inherit;
+    padding:9px 12px;
+    border:2px solid var(--line);
+    border-radius:10px;
+    background:var(--field);
+    color:var(--ink);
+  }
+  .nt-field:focus, .nt-dates input:focus{ outline:none; border-color:var(--blue); background:var(--field-focus); }
+  .nt-dates{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+  .nt-dates .field label{ margin:0; }
+  .nt-dates .field input{ margin-top:4px; padding:8px 10px; }
+  .cat-pick{ display:flex; flex-wrap:wrap; gap:6px; }
+  .cat-opt{ padding:5px 12px; border-radius:999px; font-size:.85em; }
+  .cat-opt[aria-pressed="true"]{
+    background:var(--cb, var(--blue));
+    border-color:var(--c, var(--blue));
+    color:var(--c, var(--on-accent));
+  }
+  .nt-showopt{ display:flex; align-items:center; gap:8px; font-weight:700; margin:10px 0; cursor:pointer; }
+  .nt-edit .nt-showopt{ margin:2px 0; }
+  .nt-add-btns{ display:flex; flex-wrap:wrap; gap:8px; }
+  .nt-add-btns button{ padding:9px 16px; }
+  .nt-tpls{ display:flex; flex-wrap:wrap; gap:6px; }
+  .tpl{
+    display:inline-flex;
+    align-items:stretch;
+    max-width:100%;
+    border:2px solid var(--line);
+    border-radius:999px;
+    overflow:hidden;
+    background:var(--surface-2);
+  }
+  .tpl button{ border:0; border-radius:0; background:transparent; font-size:.85em; padding:6px 10px; }
+  .tpl button:hover{ background:var(--hover); }
+  .tpl .tpl-add{ display:inline-flex; align-items:center; text-align:left; min-width:0; }
+  .tpl .tpl-del{ color:var(--muted); border-left:1px solid var(--line); padding:6px 11px; }
+  .tpl-dot{ flex:0 0 auto; width:.65em; height:.65em; border-radius:50%; margin-right:7px; background:var(--c, var(--line-strong)); }
+
+  /* 탭이 하나 늘어서 넓은 화면(1920)에서도 탭 줄이 한 줄에 다 들어오도록 조금 조인다 */
+  @media (min-width:1501px){
+    .tabs{ gap:4px; }
+    .tab{ padding:10px 12px; font-size:clamp(15px, min(1.05vw, 2.1vh), 21px); }
+  }
+
+  @media (max-width:1000px){
+    .nt-cols{ grid-template-columns:minmax(0, 1fr); }
+    .nt-side{ border-left:none; padding-left:0; border-top:2px solid var(--line); padding-top:14px; }
+  }
+  @media (max-width:640px){
+    .nt-item{ flex-wrap:wrap; }
+    .nt-acts{ width:100%; justify-content:flex-end; }
+  }
+
+  /* 모니터: 알림장 탭도 한 화면에 — 목록과 추가 칸이 각자 스크롤 */
+  @media (min-width:1001px) and (min-height:600px){
+    /* 안내판: 알림이 많아도 카드가 화면 밖으로 밀리지 않고 카드 안에서 스크롤 */
+    .cards{ grid-template-rows:minmax(0, 1fr); }
+    #panel-notices .panel-scroll{ display:flex; flex-direction:column; overflow:hidden; }
+    #panel-notices .tool-panel{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      padding:14px 20px 16px; padding:clamp(10px, 1.8vh, 20px) 20px clamp(12px, 2vh, 22px);
+    }
+    .nt-top{ flex:0 0 auto; margin-bottom:10px; margin-bottom:clamp(6px, 1.2vh, 14px); }
+    .nt-cols{ flex:1 1 auto; min-height:0; grid-template-rows:minmax(0, 1fr); }
+    .nt-main{ min-height:0; display:flex; flex-direction:column; }
+    .nt-bar, #ntHint{ flex:0 0 auto; }
+    .nt-list, .nt-side{ min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-right:4px; }
+    .nt-list{ flex:1 1 auto; }
+    .nt-list::-webkit-scrollbar, .nt-side::-webkit-scrollbar{ width:8px; }
+    .nt-list::-webkit-scrollbar-thumb, .nt-side::-webkit-scrollbar-thumb{ background:var(--line-strong); border-radius:99px; }
+  }
+
+  @media print{
+    html[data-theme="chalk"]{
+      --cat-hw:#2a55b8; --cat-prep:#9a5b00; --cat-submit:#b42357; --cat-event:#1f7a4d; --cat-etc:#555;
+      --cat-hw-bg:#fff; --cat-prep-bg:#fff; --cat-submit-bg:#fff; --cat-event-bg:#fff; --cat-etc-bg:#fff;
+    }
+    .nt-acts, .nt-pin, .card-more, #ntList .drag-handle{ display:none !important; }
+    .nt-cols{ display:block !important; }
+    .nt-list{ overflow:visible !important; }
+    .nt-item{ break-inside:avoid; }
+  }
+
 /* ── 인쇄 ─────────────────────────────── */
   @media print{
     html, body{ height:auto; overflow:visible; background:#fff; font-size:13pt; }
@@ -2228,6 +2481,7 @@
   <!-- ══ 탭 ═════════════════════════════ -->
   <nav class="tabs" id="tabs" aria-label="화면 선택">
     <button class="tab active" data-tab="board" aria-pressed="true">📋 안내판</button>
+    <button class="tab" data-tab="notices" aria-pressed="false">📒 알림장</button>
     <button class="tab" data-tab="timetable" aria-pressed="false">🗓️ 시간표</button>
     <button class="tab" data-tab="meal" aria-pressed="false">🍚 오늘 급식</button>
     <button class="tab" data-tab="exam" aria-pressed="false">📝 시험 범위</button>
@@ -2261,7 +2515,7 @@
         </section>
 
         <section class="card">
-          <h2><span class="num">2</span>알림장</h2>
+          <h2><span class="num">2</span>알림장<button type="button" class="card-more no-print" id="noticeMore" title="📒 알림장 탭에서 모든 알림 보기">전체 ›</button></h2>
           <ul class="card-body" id="noticeList"></ul>
           <div class="add-form">
             <input type="text" id="noticeInput" maxlength="60" placeholder="알림 내용 입력">
@@ -2278,6 +2532,53 @@
             <button id="eventAdd">추가</button>
           </div>
         </section>
+      </div>
+    </section>
+
+    <!-- ══ 📒 알림장 ═══════════════════════ -->
+    <section class="panel" id="panel-notices">
+      <div class="panel-scroll">
+        <div class="tool-panel">
+          <div class="nt-top">
+            <h3 class="tool-title">📒 알림장</h3>
+            <div class="nt-views teacher-only no-print" role="group" aria-label="목록 고르기">
+              <button type="button" id="ntViewList" aria-pressed="true">알림 목록<b id="ntCountList">0</b></button>
+              <button type="button" id="ntViewArch" aria-pressed="false">📦 보관함<b id="ntCountArch">0</b></button>
+            </div>
+          </div>
+
+          <div class="nt-cols">
+            <div class="nt-main">
+              <div class="nt-bar no-print">
+                <div class="nt-filter" id="ntFilter" role="group" aria-label="분류별로 보기"></div>
+                <button type="button" class="teacher-only" id="ntArchiveDone" hidden>✔ 완료한 알림 보관</button>
+                <button type="button" class="btn-danger teacher-only" id="ntEmptyArch" hidden>🗑️ 보관함 비우기</button>
+              </div>
+              <p class="hint teacher-only no-print" id="ntHint"></p>
+              <ul class="nt-list" id="ntList"></ul>
+            </div>
+
+            <div class="nt-side teacher-only no-print">
+              <div class="side-label">새 알림</div>
+              <input type="text" class="nt-field" id="ntInput" maxlength="80" placeholder="알림 내용 입력" aria-label="새 알림 내용">
+              <div class="side-label">분류</div>
+              <div id="ntCatPick"></div>
+              <div class="side-label">언제 띄울까요? <small>비워 두면 바로</small></div>
+              <div class="nt-dates">
+                <div class="field"><label>띄울 날<input type="date" id="ntFrom"></label></div>
+                <div class="field"><label>끝나는 날<input type="date" id="ntTo"></label></div>
+              </div>
+              <p class="hint">띄울 날만 고르면 그날 하루, 끝나는 날도 고르면 그 기간 동안 안내판에 뜹니다. 기간이 지나면 보관함으로 저절로 옮겨집니다.</p>
+              <label class="nt-showopt"><input type="checkbox" id="ntShow" checked> 📌 안내판에 띄우기</label>
+              <div class="nt-add-btns">
+                <button type="button" class="btn-main" id="ntAdd">＋ 추가</button>
+                <button type="button" id="ntSaveTpl">☆ 자주 쓰는 알림에 저장</button>
+              </div>
+              <div class="side-label" style="margin-top:16px;">자주 쓰는 알림 <small>누르면 바로 추가</small></div>
+              <div class="nt-tpls" id="ntTpls"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2949,6 +3250,7 @@
     if (name === 'seats') fitSeatFont();
     if (name === 'meal') ensureMealLoaded();
     if (name === 'exam') renderExam();
+    if (name === 'notices') renderNoticeTab();
   }
 
   tabButtons.forEach(function (btn) {
@@ -2986,6 +3288,7 @@
       if (STUDENT_HIDDEN_TABS.indexOf(currentTab) !== -1) showTab('board');
     }
     studentPlaceholders(on);
+    renderNotices();
     fitSeatFont();
 
     if (!quiet) {
@@ -3099,6 +3402,12 @@
       motto: '함께 배우고 함께 자란다',
       periods: ['', '', '', '', '', '', ''],
       notices: [],
+      noticeTemplates: [
+        { text: '내일 체육복 등교', cat: 'prep' },
+        { text: '가정통신문 회신서 제출', cat: 'submit' },
+        { text: '교과서·공책 챙기기', cat: 'prep' },
+        { text: '수행평가 준비하기', cat: 'hw' }
+      ],
       events: []
     };
   }
@@ -3121,8 +3430,9 @@
     if (Array.isArray(saved.notices)) {
       board.notices = saved.notices
         .filter(function (n) { return n && typeof n.text === 'string'; })
-        .map(function (n) { return { id: n.id || uid(), text: n.text, done: !!n.done }; });
+        .map(normNotice);
     }
+    if (Array.isArray(saved.noticeTemplates)) board.noticeTemplates = normTemplates(saved.noticeTemplates);
     if (Array.isArray(saved.events)) {
       board.events = saved.events
         .filter(function (e) { return e && typeof e.name === 'string' && typeof e.date === 'string'; })
@@ -3172,6 +3482,7 @@
     if (lastDateKey && key !== lastDateKey) {
       clearStaleOverride();
       renderEvents();
+      renderNotices();          /* 날짜를 정한 알림이 저절로 뜨고 내려가도록 */
       renderTimetableTable();
     }
     lastDateKey = key;
@@ -3221,34 +3532,163 @@
     }
   }
 
-  /* ② 알림장 */
+  /* ② 알림장 ─────────────────────────────────────────
+     안내판 카드와 📒 알림장 탭이 같은 목록(board.notices)을 함께 쓴다.
+     알림 하나 = { id, text, done(완료 줄 긋기), show(📌 안내판에 띄우기), cat(분류),
+                  from·to(띄울 기간), arch(보관함), archAt(보관한 날) } */
   var noticeList = document.getElementById('noticeList');
   var noticeInput = document.getElementById('noticeInput');
+  var noticeMore = document.getElementById('noticeMore');
 
+  var NOTICE_CATS = [
+    { k: 'hw', name: '과제' },
+    { k: 'prep', name: '준비물' },
+    { k: 'submit', name: '제출' },
+    { k: 'event', name: '행사' },
+    { k: 'etc', name: '기타' }
+  ];
+
+  function catName(k) {
+    for (var i = 0; i < NOTICE_CATS.length; i++) if (NOTICE_CATS[i].k === k) return NOTICE_CATS[i].name;
+    return '';
+  }
+
+  function validDateStr(s) { return parseDate(s) ? s : ''; }
+
+  /* 저장된 값·서버 값 → 알림 한 개 (예전 형식 {id,text,done}도 그대로 안내판에 보이게) */
+  function normNotice(n) {
+    var o = {
+      id: String(n.id || uid()),
+      text: String(n.text),
+      done: !!n.done,
+      show: n.show !== false,
+      cat: catName(n.cat) ? n.cat : '',
+      from: validDateStr(n.from),
+      to: validDateStr(n.to),
+      arch: !!n.arch,
+      archAt: validDateStr(n.archAt)
+    };
+    if (o.from && o.to && o.to < o.from) { var t = o.from; o.from = o.to; o.to = t; }
+    return o;
+  }
+
+  function normTemplates(list) {
+    var out = [];
+    list.forEach(function (t) {
+      if (!t || typeof t.text !== 'string' || !t.text.trim()) return;
+      if (out.some(function (o) { return o.text === t.text.trim(); })) return;
+      out.push({ text: t.text.trim().slice(0, 80), cat: catName(t.cat) ? t.cat : '' });
+    });
+    return out;
+  }
+
+  function noticeTodayKey() { return dateKey(new Date()); }
+  function noticeEnd(n) { return n.to || n.from; }
+  function noticeExpired(n, today) { var e = noticeEnd(n); return !!e && today > e; }
+  function noticeNotYet(n, today) { return !!n.from && today < n.from; }
+  function noticeArchived(n, today) { return n.arch || noticeExpired(n, today); }
+  function noticeOnBoard(n, today) {
+    return !noticeArchived(n, today) && n.show && !noticeNotYet(n, today);
+  }
+
+  function shortDate(s) {
+    var d = parseDate(s);
+    return d ? (d.getMonth() + 1) + '/' + d.getDate() + '(' + DAY_SHORT[d.getDay()] + ')' : s;
+  }
+
+  function noticeRangeText(n) {
+    if (n.from && n.to && n.from !== n.to) return shortDate(n.from) + ' ~ ' + shortDate(n.to);
+    if (n.from) return shortDate(n.from) + ' 하루';
+    if (n.to) return shortDate(n.to) + '까지';
+    return '';
+  }
+
+  /* 날짜 칸 두 개를 읽어 검사한다. 잘못되면 { err } */
+  function readNoticeDates(fromVal, toVal) {
+    var f = validDateStr(fromVal), t = validDateStr(toVal);
+    if ((fromVal && !f) || (toVal && !t)) return { err: '날짜를 올바르게 골라 주세요.' };
+    if (f && t && t < f) return { err: '끝나는 날이 띄울 날보다 앞설 수 없어요.' };
+    if (f && t === f) t = '';
+    var end = t || f;
+    if (end && end < noticeTodayKey()) return { err: '이미 지난 날짜예요. 오늘이나 그 뒤의 날짜를 골라 주세요.' };
+    return { from: f, to: t };
+  }
+
+  function catTag(cat) {
+    return el('span', 'cat-tag cat-' + cat, catName(cat));
+  }
+
+  /* 분류 고르기 (단추 묶음) */
+  function makeCatPicker(current) {
+    var value = current || '';
+    var wrap = el('div', 'cat-pick');
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', '분류 고르기');
+    var opts = [{ k: '', name: '없음' }].concat(NOTICE_CATS);
+    var buttons = opts.map(function (o) {
+      var b = el('button', 'cat-opt' + (o.k ? ' cat-' + o.k : ''), o.name);
+      b.type = 'button';
+      b.setAttribute('data-cat', o.k);
+      b.addEventListener('click', function () { value = o.k; sync(); });
+      wrap.appendChild(b);
+      return b;
+    });
+    function sync() {
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-cat') === value ? 'true' : 'false');
+      });
+    }
+    sync();
+    return {
+      node: wrap,
+      get: function () { return value; },
+      set: function (v) { value = v || ''; sync(); }
+    };
+  }
+
+  /* 순서 손잡이: 끌어서 놓거나, ↑↓ 키로 옮긴다 (안내판·알림장 탭 공통) */
+  function makeNoticeHandle(li, item, list) {
+    var handle = el('button', 'drag-handle', '⠿');
+    handle.type = 'button';
+    handle.title = '끌어서 순서 바꾸기 (↑↓ 키로도 옮길 수 있어요)';
+    handle.setAttribute('aria-label', item.text + ' — 순서 옮기기. 위아래 화살표 키로 옮깁니다');
+    handle.addEventListener('pointerdown', function (e) { startNoticeDrag(e, li, handle, list); });
+    handle.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        moveNotice(item.id, e.key === 'ArrowUp' ? -1 : 1, list);
+      }
+    });
+    return handle;
+  }
+
+  /* 안내판과 알림장 탭을 함께 다시 그린다 */
   function renderNotices() {
+    renderBoardNotices();
+    renderNoticeTab();
+  }
+
+  /* ── 안내판 카드: 📌 체크했고, 오늘이 띄울 기간 안인 알림만 ── */
+  function renderBoardNotices() {
     noticeList.textContent = '';
-    if (board.notices.length === 0) {
-      var empty = el('li', 'empty', editMode ? '아래 칸에 알림을 입력해 추가하세요.' : '오늘은 알림이 없습니다.');
-      noticeList.appendChild(empty);
+    var today = noticeTodayKey();
+    var active = 0;
+    var shown = board.notices.filter(function (n) {
+      if (!noticeArchived(n, today)) active++;
+      return noticeOnBoard(n, today);
+    });
+    if (noticeMore) noticeMore.textContent = active ? '전체 ' + active + '개 ›' : '알림장 ›';
+
+    if (shown.length === 0) {
+      var msg = editMode ? '아래 칸에 알림을 입력해 추가하세요.' : '오늘은 알림이 없습니다.';
+      if (!editMode && active && !studentMode) msg = '안내판에 띄운 알림이 없습니다. 📒 알림장 탭에서 체크해 보세요.';
+      noticeList.appendChild(el('li', 'empty', msg));
       return;
     }
-    board.notices.forEach(function (item) {
+    shown.forEach(function (item) {
       var li = el('li', 'notice-item' + (item.done ? ' done' : ''));
       li.setAttribute('data-id', item.id);
-
-      /* 편집 모드에서만 보이는 순서 손잡이: 끌어서 놓거나, ↑↓ 키로 옮긴다 */
-      var handle = el('button', 'drag-handle', '⠿');
-      handle.type = 'button';
-      handle.title = '끌어서 순서 바꾸기 (↑↓ 키로도 옮길 수 있어요)';
-      handle.setAttribute('aria-label', item.text + ' — 순서 옮기기. 위아래 화살표 키로 옮깁니다');
-      handle.addEventListener('pointerdown', function (e) { startNoticeDrag(e, li, handle); });
-      handle.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-          e.preventDefault();
-          moveNotice(item.id, e.key === 'ArrowUp' ? -1 : 1);
-        }
-      });
-      li.appendChild(handle);
+      li.appendChild(makeNoticeHandle(li, item, noticeList));
 
       var check = document.createElement('input');
       check.type = 'checkbox';
@@ -3260,6 +3700,8 @@
         saveBoard();
       });
       li.appendChild(check);
+
+      if (item.cat) li.appendChild(catTag(item.cat));
 
       var text = el('span', 'text', item.text);
       text.addEventListener('click', function () {
@@ -3284,28 +3726,413 @@
     });
   }
 
+  if (noticeMore) noticeMore.addEventListener('click', function () { showTab('notices'); });
+
+  /* ── 📒 알림장 탭 ───────────────────────────────── */
+  var ntList = document.getElementById('ntList');
+  var ntFilterBox = document.getElementById('ntFilter');
+  var ntInput = document.getElementById('ntInput');
+  var ntFrom = document.getElementById('ntFrom');
+  var ntTo = document.getElementById('ntTo');
+  var ntShow = document.getElementById('ntShow');
+  var ntView = 'list';          /* 'list' 알림 목록 | 'archive' 보관함 */
+  var ntFilter = '';            /* '' 전체 | 분류 key */
+  var ntEditingId = null;       /* 고치는 중인 알림 */
+  var ntCatPick = makeCatPicker('');
+  document.getElementById('ntCatPick').appendChild(ntCatPick.node);
+
+  function ntButton(label, cls, onClick, aria) {
+    var b = el('button', cls || '', label);
+    b.type = 'button';
+    if (aria) b.setAttribute('aria-label', aria);
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function renderNoticeTab() {
+    if (!ntList) return;
+    var today = noticeTodayKey();
+    if (studentMode) { ntView = 'list'; ntEditingId = null; }
+    renderNoticeTemplates();
+
+    var active = [], archived = [];
+    board.notices.forEach(function (n) { (noticeArchived(n, today) ? archived : active).push(n); });
+
+    document.getElementById('ntCountList').textContent = active.length;
+    document.getElementById('ntCountArch').textContent = archived.length;
+    document.getElementById('ntViewList').setAttribute('aria-pressed', ntView === 'list' ? 'true' : 'false');
+    document.getElementById('ntViewArch').setAttribute('aria-pressed', ntView === 'archive' ? 'true' : 'false');
+
+    var source = ntView === 'archive' ? archived : active;
+
+    /* 분류 거르기 단추 */
+    ntFilterBox.textContent = '';
+    var counts = {};
+    source.forEach(function (n) { counts[n.cat] = (counts[n.cat] || 0) + 1; });
+    if (ntFilter && !counts[ntFilter]) ntFilter = '';
+    var chips = [{ k: '', name: '전체', n: source.length }];
+    NOTICE_CATS.forEach(function (c) { if (counts[c.k]) chips.push({ k: c.k, name: c.name, n: counts[c.k] }); });
+    if (chips.length > 1) {
+      chips.forEach(function (c) {
+        var b = ntButton(c.name + ' ' + c.n, 'nt-chip' + (c.k ? ' cat-' + c.k : ''), function () {
+          ntFilter = c.k;
+          renderNoticeTab();
+        });
+        b.setAttribute('aria-pressed', ntFilter === c.k ? 'true' : 'false');
+        ntFilterBox.appendChild(b);
+      });
+    }
+
+    var doneCount = active.filter(function (n) { return n.done; }).length;
+    var archDone = document.getElementById('ntArchiveDone');
+    archDone.textContent = '✔ 완료한 알림 ' + doneCount + '개 보관';
+    archDone.hidden = !(ntView === 'list' && doneCount > 0);
+    document.getElementById('ntEmptyArch').hidden = !(ntView === 'archive' && archived.length > 0);
+    document.getElementById('ntHint').textContent = ntView === 'archive'
+      ? '기간이 지났거나 보관한 알림입니다. ‘꺼내기’를 누르면 알림 목록으로 돌아갑니다.'
+      : '📌 체크한 알림만 안내판에 보입니다. 날짜를 정한 알림은 그 기간에만 보이고, 기간이 지나면 보관함으로 옮겨집니다.';
+
+    ntList.textContent = '';
+    ntList.classList.toggle('is-archive', ntView === 'archive');
+    var rows = ntFilter ? source.filter(function (n) { return n.cat === ntFilter; }) : source;
+    if (!rows.length) {
+      var msg = ntView === 'archive' ? '보관함이 비어 있습니다.'
+        : (studentMode ? '알림이 없습니다.' : '오른쪽 칸에 알림을 입력해 추가하세요.');
+      ntList.appendChild(el('li', 'empty', msg));
+      return;
+    }
+    rows.forEach(function (item) {
+      if (ntView === 'archive') ntList.appendChild(ntArchiveRow(item, today));
+      else if (ntEditingId === item.id) ntList.appendChild(ntEditRow(item));
+      else ntList.appendChild(ntRow(item, today));
+    });
+  }
+
+  /* 알림 목록의 한 줄 */
+  function ntRow(item, today) {
+    var onBoard = noticeOnBoard(item, today);
+    var li = el('li', 'nt-item' + (item.done ? ' done' : '') + (onBoard ? ' on-board' : ''));
+    li.setAttribute('data-id', item.id);
+
+    if (!studentMode) {
+      li.appendChild(makeNoticeHandle(li, item, ntList));
+      var pin = el('label', 'nt-pin');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = item.show;
+      cb.setAttribute('aria-label', item.text + ' — 안내판에 띄우기');
+      cb.addEventListener('change', function () {
+        item.show = cb.checked;
+        saveBoard();
+        renderNotices();
+        if (!cb.checked) showNotice('안내판에서 내렸습니다.');
+        else if (noticeNotYet(item, noticeTodayKey())) showNotice(shortDate(item.from) + '이 되면 안내판에 저절로 뜹니다.');
+        else showNotice('안내판에 띄웠습니다.');
+      });
+      pin.appendChild(cb);
+      pin.appendChild(el('span', '', '안내판'));
+      li.appendChild(pin);
+    }
+
+    var body = el('div', 'nt-body');
+    var line = el('div', 'nt-line');
+    if (item.cat) line.appendChild(catTag(item.cat));
+    line.appendChild(el('span', 'nt-text', item.text));
+    body.appendChild(line);
+
+    var meta = el('div', 'nt-meta');
+    if (onBoard) meta.appendChild(el('span', 'nt-badge on', '📌 안내판에 표시 중'));
+    else if (item.show && noticeNotYet(item, today)) meta.appendChild(el('span', 'nt-badge wait', '⏳ ' + shortDate(item.from) + '부터 표시'));
+    var range = noticeRangeText(item);
+    if (range) meta.appendChild(el('span', 'nt-badge', '📅 ' + range));
+    if (item.done) meta.appendChild(el('span', 'nt-badge done', '✔ 완료'));
+    if (meta.hasChildNodes()) body.appendChild(meta);
+    li.appendChild(body);
+
+    if (!studentMode) {
+      var acts = el('div', 'nt-acts');
+      acts.appendChild(ntButton('수정', '', function () {
+        ntEditingId = item.id;
+        renderNoticeTab();
+        var inp = ntList.querySelector('.nt-edit-text');
+        if (inp) { inp.focus(); inp.select(); }
+      }, item.text + ' 고치기'));
+      acts.appendChild(ntButton('보관', '', function () {
+        item.arch = true;
+        item.archAt = noticeTodayKey();
+        saveBoard();
+        renderNotices();
+        showNotice('보관함으로 옮겼습니다. 보관함에서 다시 꺼낼 수 있어요.');
+      }, item.text + ' 보관함으로'));
+      acts.appendChild(ntButton('삭제', 'danger', function () {
+        board.notices = board.notices.filter(function (n) { return n.id !== item.id; });
+        saveBoard();
+        renderNotices();
+        showNotice('알림 1개를 지웠습니다.');
+      }, item.text + ' 지우기'));
+      li.appendChild(acts);
+    }
+    return li;
+  }
+
+  /* 고치는 중인 줄 */
+  function ntEditRow(item) {
+    var li = el('li', 'nt-item editing');
+    li.setAttribute('data-id', item.id);
+    var form = el('div', 'nt-edit');
+
+    var text = document.createElement('input');
+    text.type = 'text';
+    text.className = 'nt-field nt-edit-text';
+    text.maxLength = 80;
+    text.value = item.text;
+    text.setAttribute('aria-label', '알림 내용');
+    form.appendChild(text);
+
+    var pick = makeCatPicker(item.cat);
+    form.appendChild(pick.node);
+
+    var dates = el('div', 'nt-dates');
+    function dateField(label, value) {
+      var f = el('div', 'field');
+      var lb = el('label', '', label);
+      var inp = document.createElement('input');
+      inp.type = 'date';
+      inp.value = value || '';
+      lb.appendChild(inp);
+      f.appendChild(lb);
+      dates.appendChild(f);
+      return inp;
+    }
+    var fromIn = dateField('띄울 날', item.from);
+    var toIn = dateField('끝나는 날', item.to);
+    form.appendChild(dates);
+
+    var showLb = el('label', 'nt-showopt');
+    var showCb = document.createElement('input');
+    showCb.type = 'checkbox';
+    showCb.checked = item.show;
+    showLb.appendChild(showCb);
+    showLb.appendChild(document.createTextNode(' 📌 안내판에 띄우기'));
+    form.appendChild(showLb);
+
+    function save() {
+      var t = text.value.trim();
+      if (!t) { showNotice('알림 내용을 입력해 주세요.'); text.focus(); return; }
+      var r = readNoticeDates(fromIn.value, toIn.value);
+      if (r.err) { showNotice(r.err); fromIn.focus(); return; }
+      item.text = t;
+      item.cat = pick.get();
+      item.from = r.from;
+      item.to = r.to;
+      item.show = showCb.checked;
+      ntEditingId = null;
+      FB.pendingRemote = null;
+      saveBoard();
+      renderNotices();
+      markMoved(ntList, item.id, false);
+      showNotice('고쳤습니다.');
+    }
+    function cancel() {
+      ntEditingId = null;
+      renderNotices();
+      if (FB.pendingRemote) applyRemote(FB.pendingRemote);
+    }
+    text.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); save(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+    });
+
+    var btns = el('div', 'nt-add-btns');
+    btns.appendChild(ntButton('저장', 'btn-main', save));
+    btns.appendChild(ntButton('취소', '', cancel));
+    form.appendChild(btns);
+
+    li.appendChild(form);
+    return li;
+  }
+
+  /* 보관함의 한 줄 */
+  function ntArchiveRow(item, today) {
+    var li = el('li', 'nt-item archived' + (item.done ? ' done' : ''));
+    li.setAttribute('data-id', item.id);
+    var body = el('div', 'nt-body');
+    var line = el('div', 'nt-line');
+    if (item.cat) line.appendChild(catTag(item.cat));
+    line.appendChild(el('span', 'nt-text', item.text));
+    body.appendChild(line);
+    var meta = el('div', 'nt-meta');
+    if (item.arch) meta.appendChild(el('span', 'nt-badge', '📦 ' + (item.archAt ? shortDate(item.archAt) + ' 보관' : '보관함')));
+    else meta.appendChild(el('span', 'nt-badge', '⌛ ' + shortDate(noticeEnd(item)) + ' 기간 끝남'));
+    if (item.done) meta.appendChild(el('span', 'nt-badge done', '✔ 완료'));
+    body.appendChild(meta);
+    li.appendChild(body);
+
+    var acts = el('div', 'nt-acts');
+    acts.appendChild(ntButton('꺼내기', '', function () {
+      item.arch = false;
+      item.archAt = '';
+      if (noticeExpired(item, today)) { item.from = ''; item.to = ''; }
+      item.done = false;
+      item.show = false;
+      saveBoard();
+      renderNotices();
+      showNotice('알림 목록으로 꺼냈어요. 안내판에 띄우려면 📌 체크하세요.');
+    }, item.text + ' 다시 꺼내기'));
+    acts.appendChild(ntButton('삭제', 'danger', function () {
+      board.notices = board.notices.filter(function (n) { return n.id !== item.id; });
+      saveBoard();
+      renderNotices();
+      showNotice('알림 1개를 완전히 지웠습니다.');
+    }, item.text + ' 완전히 지우기'));
+    li.appendChild(acts);
+    return li;
+  }
+
+  /* 목록 ↔ 보관함 */
+  document.getElementById('ntViewList').addEventListener('click', function () {
+    ntView = 'list'; ntFilter = ''; renderNoticeTab();
+  });
+  document.getElementById('ntViewArch').addEventListener('click', function () {
+    ntView = 'archive'; ntFilter = ''; ntEditingId = null; renderNoticeTab();
+  });
+
+  document.getElementById('ntArchiveDone').addEventListener('click', function () {
+    var today = noticeTodayKey(), n = 0;
+    board.notices.forEach(function (item) {
+      if (item.done && !noticeArchived(item, today)) { item.arch = true; item.archAt = today; n++; }
+    });
+    if (!n) return;
+    saveBoard();
+    renderNotices();
+    showNotice('완료한 알림 ' + n + '개를 보관함으로 옮겼습니다.');
+  });
+
+  document.getElementById('ntEmptyArch').addEventListener('click', function () {
+    var today = noticeTodayKey();
+    var count = board.notices.filter(function (n) { return noticeArchived(n, today); }).length;
+    if (!count) return;
+    askConfirm(
+      '보관함 비우기',
+      '보관함에 있는 알림 ' + count + '개를 완전히 지웁니다. 되돌릴 수 없습니다. 정말 지울까요?',
+      '네, 비웁니다',
+      function () {
+        var t = noticeTodayKey();
+        board.notices = board.notices.filter(function (n) { return !noticeArchived(n, t); });
+        saveBoard();
+        renderNotices();
+        showNotice('보관함을 비웠습니다.');
+      }
+    );
+  });
+
+  /* 새 알림 추가 (탭) */
+  function addNoticeFromTab(text, cat) {
+    var r = readNoticeDates(ntFrom.value, ntTo.value);
+    if (r.err) { showNotice(r.err); ntFrom.focus(); return false; }
+    var item = normNotice({ text: text, cat: cat, show: ntShow.checked, from: r.from, to: r.to });
+    board.notices.push(item);
+    ntView = 'list';
+    if (ntFilter && ntFilter !== item.cat) ntFilter = '';
+    saveBoard();
+    renderNotices();
+    markMoved(ntList, item.id, false);
+    var last = ntList.querySelector('li[data-id="' + item.id + '"]');
+    if (last && last.scrollIntoView) last.scrollIntoView({ block: 'nearest' });
+    var today = noticeTodayKey();
+    if (noticeOnBoard(item, today)) showNotice('알림을 추가하고 안내판에도 띄웠습니다.');
+    else if (item.show) showNotice('알림을 추가했습니다. ' + shortDate(item.from) + '에 안내판에 뜹니다.');
+    else showNotice('알림을 추가했습니다. (안내판에는 아직 안 보여요)');
+    return true;
+  }
+
+  document.getElementById('ntAdd').addEventListener('click', function () {
+    var text = ntInput.value.trim();
+    if (!text) { showNotice('알림 내용을 입력해 주세요.'); ntInput.focus(); return; }
+    if (addNoticeFromTab(text, ntCatPick.get())) {
+      ntInput.value = '';
+      ntFrom.value = '';
+      ntTo.value = '';
+      ntInput.focus();
+    }
+  });
+  ntInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('ntAdd').click(); }
+  });
+
+  /* 자주 쓰는 알림 */
+  function renderNoticeTemplates() {
+    var box = document.getElementById('ntTpls');
+    box.textContent = '';
+    if (!board.noticeTemplates.length) {
+      box.appendChild(el('p', 'hint', '알림 내용을 쓰고 ‘☆ 자주 쓰는 알림에 저장’을 누르면 여기에 생깁니다.'));
+      return;
+    }
+    board.noticeTemplates.forEach(function (tpl, i) {
+      var wrap = el('span', 'tpl');
+      var add = el('button', 'tpl-add');
+      add.type = 'button';
+      add.appendChild(el('span', 'tpl-dot' + (tpl.cat ? ' cat-' + tpl.cat : '')));
+      add.appendChild(document.createTextNode(tpl.text));
+      add.title = '눌러서 바로 추가' + (tpl.cat ? ' (' + catName(tpl.cat) + ')' : '');
+      add.addEventListener('click', function () { addNoticeFromTab(tpl.text, tpl.cat); });
+      wrap.appendChild(add);
+      var del = el('button', 'tpl-del', '×');
+      del.type = 'button';
+      del.setAttribute('aria-label', '자주 쓰는 알림에서 “' + tpl.text + '” 빼기');
+      del.addEventListener('click', function () {
+        board.noticeTemplates.splice(i, 1);
+        saveBoard();
+        renderNoticeTemplates();
+      });
+      wrap.appendChild(del);
+      box.appendChild(wrap);
+    });
+  }
+
+  document.getElementById('ntSaveTpl').addEventListener('click', function () {
+    var text = ntInput.value.trim();
+    if (!text) { showNotice('저장할 알림 내용을 먼저 입력해 주세요.'); ntInput.focus(); return; }
+    if (board.noticeTemplates.some(function (t) { return t.text === text; })) {
+      showNotice('이미 자주 쓰는 알림에 있어요.');
+      return;
+    }
+    if (board.noticeTemplates.length >= 24) {
+      showNotice('자주 쓰는 알림은 24개까지 저장할 수 있어요. 안 쓰는 것을 × 로 빼 주세요.');
+      return;
+    }
+    board.noticeTemplates.push({ text: text.slice(0, 80), cat: ntCatPick.get() });
+    saveBoard();
+    renderNoticeTemplates();
+    showNotice('자주 쓰는 알림에 저장했습니다.');
+  });
+
   /* ── 알림 순서 바꾸기 ─────────────────────────────
      마우스·터치(전자칠판)·펜 모두 되도록 Pointer 이벤트로 직접 처리한다.
+     안내판 카드와 알림장 탭 목록 모두 같은 함수를 쓴다.
      놓는 순간 한 번만 저장(로그인 상태면 모두에게 공유). */
   var noticeDrag = null;
 
-  function noticeOrderInList() {
-    return Array.prototype.map.call(noticeList.querySelectorAll('li[data-id]'), function (n) {
+  function noticeOrderInList(list) {
+    return Array.prototype.map.call(list.querySelectorAll('li[data-id]'), function (n) {
       return n.getAttribute('data-id');
     });
   }
 
+  /* 화면에 보이는 알림들의 새 순서를, 안 보이는 알림의 자리는 그대로 두고 끼워 넣는다 */
   function applyNoticeOrder(order) {
-    var byId = {};
+    var byId = {}, inOrder = {};
     board.notices.forEach(function (n) { byId[n.id] = n; });
-    var next = [];
-    order.forEach(function (id) { if (byId[id] && next.indexOf(byId[id]) === -1) next.push(byId[id]); });
-    board.notices.forEach(function (n) { if (next.indexOf(n) === -1) next.push(n); });
-    board.notices = next;
+    var queue = [];
+    order.forEach(function (id) {
+      if (byId[id] && !inOrder[id]) { inOrder[id] = true; queue.push(byId[id]); }
+    });
+    var k = 0;
+    board.notices = board.notices.map(function (n) { return inOrder[n.id] ? queue[k++] : n; });
   }
 
-  function markMoved(id, focusHandle) {
-    Array.prototype.forEach.call(noticeList.querySelectorAll('li[data-id]'), function (n) {
+  function markMoved(list, id, focusHandle) {
+    Array.prototype.forEach.call(list.querySelectorAll('li[data-id]'), function (n) {
       if (n.getAttribute('data-id') !== id) return;
       n.classList.add('moved');
       setTimeout(function () { n.classList.remove('moved'); }, 750);
@@ -3316,27 +4143,29 @@
     });
   }
 
-  function startNoticeDrag(e, li, handle) {
-    if (!editMode || noticeDrag) return;
+  function startNoticeDrag(e, li, handle, list) {
+    if (noticeDrag) return;
+    if (list === noticeList ? !editMode : studentMode) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault();
     noticeDrag = {
+      list: list,
       li: li,
       handle: handle,
       id: li.getAttribute('data-id'),
       pointerId: e.pointerId,
-      before: noticeOrderInList().join('|'),
+      before: noticeOrderInList(list).join('|'),
       lastY: e.clientY,
       raf: 0
     };
     /* 항목이 목록 안에서 자리를 옮겨도 끊기지 않도록, 움직이지 않는 목록(ul)이 포인터를 붙잡는다 */
-    try { noticeList.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+    try { list.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
     li.classList.add('dragging');
     document.body.classList.add('is-dragging');
-    noticeList.addEventListener('pointermove', onNoticeDragMove);
-    noticeList.addEventListener('pointerup', endNoticeDrag);
-    noticeList.addEventListener('pointercancel', endNoticeDrag);
-    noticeList.addEventListener('lostpointercapture', endNoticeDrag);
+    list.addEventListener('pointermove', onNoticeDragMove);
+    list.addEventListener('pointerup', endNoticeDrag);
+    list.addEventListener('pointercancel', endNoticeDrag);
+    list.addEventListener('lostpointercapture', endNoticeDrag);
     noticeDrag.raf = requestAnimationFrame(noticeDragTick);
   }
 
@@ -3351,7 +4180,8 @@
   /* 손가락 위치보다 아래에 있는 첫 항목 앞으로 옮긴다 */
   function placeDraggedNotice(d) {
     var y = d.lastY;
-    var others = Array.prototype.filter.call(noticeList.querySelectorAll('li[data-id]'), function (n) {
+    var list = d.list;
+    var others = Array.prototype.filter.call(list.querySelectorAll('li[data-id]'), function (n) {
       return n !== d.li;
     });
     var target = null;
@@ -3360,9 +4190,9 @@
       if (y < r.top + r.height / 2) { target = others[i]; break; }
     }
     if (target) {
-      if (d.li.nextElementSibling !== target) noticeList.insertBefore(d.li, target);
-    } else if (noticeList.lastElementChild !== d.li) {
-      noticeList.appendChild(d.li);
+      if (d.li.nextElementSibling !== target) list.insertBefore(d.li, target);
+    } else if (list.lastElementChild !== d.li) {
+      list.appendChild(d.li);
     }
   }
 
@@ -3370,15 +4200,16 @@
   function noticeDragTick() {
     var d = noticeDrag;
     if (!d) return;
-    var box = noticeList.getBoundingClientRect();
+    var list = d.list;
+    var box = list.getBoundingClientRect();
     var edge = Math.max(14, Math.min(32, box.height / 4));
     var step = 0;
     if (d.lastY < box.top + edge) step = -Math.min(14, Math.ceil((box.top + edge - d.lastY) / edge * 6));
     else if (d.lastY > box.bottom - edge) step = Math.min(14, Math.ceil((d.lastY - (box.bottom - edge)) / edge * 6));
     if (step) {
-      var before = noticeList.scrollTop;
-      noticeList.scrollTop = before + step;
-      if (noticeList.scrollTop !== before) placeDraggedNotice(d);
+      var before = list.scrollTop;
+      list.scrollTop = before + step;
+      if (list.scrollTop !== before) placeDraggedNotice(d);
     }
     d.raf = requestAnimationFrame(noticeDragTick);
   }
@@ -3386,41 +4217,43 @@
   function endNoticeDrag(e) {
     var d = noticeDrag;
     if (!d || (e && e.pointerId !== undefined && e.pointerId !== d.pointerId)) return;
+    var list = d.list;
     noticeDrag = null;
     cancelAnimationFrame(d.raf);
-    noticeList.removeEventListener('pointermove', onNoticeDragMove);
-    noticeList.removeEventListener('pointerup', endNoticeDrag);
-    noticeList.removeEventListener('pointercancel', endNoticeDrag);
-    noticeList.removeEventListener('lostpointercapture', endNoticeDrag);
-    try { noticeList.releasePointerCapture(d.pointerId); } catch (err) { /* 무시 */ }
+    list.removeEventListener('pointermove', onNoticeDragMove);
+    list.removeEventListener('pointerup', endNoticeDrag);
+    list.removeEventListener('pointercancel', endNoticeDrag);
+    list.removeEventListener('lostpointercapture', endNoticeDrag);
+    try { list.releasePointerCapture(d.pointerId); } catch (err) { /* 무시 */ }
     d.li.classList.remove('dragging');
     document.body.classList.remove('is-dragging');
 
-    var order = noticeOrderInList();
+    var order = noticeOrderInList(list);
     if (order.join('|') !== d.before) {
       applyNoticeOrder(order);
       if (FB.pendingRemote) FB.pendingRemote = null;   /* 끌던 사이 온 내용보다 방금 바꾼 순서를 우선 */
       saveBoard();
       renderNotices();
-      markMoved(d.id, false);
+      markMoved(list, d.id, false);
     } else if (FB.pendingRemote) {
       applyRemote(FB.pendingRemote);                    /* 순서를 안 바꿨으면 미뤄 둔 내용을 반영 */
     }
   }
 
-  function moveNotice(id, delta) {
-    var i = -1;
-    board.notices.forEach(function (n, k) { if (n.id === id) i = k; });
-    var j = i + delta;
-    if (i < 0 || j < 0 || j >= board.notices.length) return;
-    var t = board.notices[i];
-    board.notices[i] = board.notices[j];
-    board.notices[j] = t;
+  /* ↑↓ 키: 지금 그 목록에 보이는 알림끼리 한 칸 옮긴다 */
+  function moveNotice(id, delta, list) {
+    var order = noticeOrderInList(list);
+    var i = order.indexOf(id), j = i + delta;
+    if (i < 0 || j < 0 || j >= order.length) return;
+    order[i] = order[j];
+    order[j] = id;
+    applyNoticeOrder(order);
     saveBoard();
     renderNotices();
-    markMoved(id, true);
+    markMoved(list, id, true);
   }
 
+  /* 안내판 카드에서 바로 추가 → 안내판에 띄움 */
   function addNotice() {
     var text = noticeInput.value.trim();
     if (!text) {
@@ -3428,7 +4261,7 @@
       noticeInput.focus();
       return;
     }
-    board.notices.push({ id: uid(), text: text, done: false });
+    board.notices.push(normNotice({ text: text, show: true }));
     noticeInput.value = '';
     saveBoard();
     renderNotices();
@@ -3581,13 +4414,14 @@
   document.getElementById('clearAll').addEventListener('click', function () {
     askConfirm(
       '전체 지우기',
-      '시간표, 알림장, 일정에 입력한 내용이 모두 지워집니다. 되돌릴 수 없습니다. 정말 지울까요?',
+      '시간표, 알림장(보관함 포함), 일정에 입력한 내용이 모두 지워집니다. 자주 쓰는 알림은 남겨 둡니다. 되돌릴 수 없습니다. 정말 지울까요?',
       '네, 모두 지웁니다',
       function () {
-        var keepName = board.className, keepMotto = board.motto;
+        var keepName = board.className, keepMotto = board.motto, keepTpl = board.noticeTemplates;
         board = defaultBoard();
         board.className = keepName;
         board.motto = keepMotto;
+        board.noticeTemplates = keepTpl;
         saveBoard();
         renderHeader();
         renderBoardPeriods();
@@ -4537,7 +5371,11 @@
       className: board.className,
       motto: board.motto,
       periods: board.periods.slice(),
-      notices: board.notices.map(function (n) { return { id: n.id, text: n.text, done: !!n.done }; }),
+      notices: board.notices.map(function (n) {
+        return { id: n.id, text: n.text, done: !!n.done, show: !!n.show, cat: n.cat || '',
+                 from: n.from || '', to: n.to || '', arch: !!n.arch, archAt: n.archAt || '' };
+      }),
+      noticeTemplates: board.noticeTemplates.map(function (t) { return { text: t.text, cat: t.cat || '' }; }),
       events: board.events.map(function (e) { return { id: e.id, name: e.name, date: e.date }; }),
       timetable: flatTimetable(),
       override: todayOverride ? {
@@ -4559,7 +5397,7 @@
   /* 서버에서 받은 내용을 화면에 반영 */
   function applyRemote(d) {
     var ae = document.activeElement;
-    if ((ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) || noticeDrag) {
+    if ((ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) || noticeDrag || ntEditingId) {
       FB.pendingRemote = d;     /* 입력 중·순서 끄는 중에는 화면을 갈아엎지 않는다 */
       return;
     }
@@ -4575,8 +5413,9 @@
     if (Array.isArray(d.notices)) {
       board.notices = d.notices
         .filter(function (n) { return n && typeof n.text === 'string'; })
-        .map(function (n) { return { id: n.id || uid(), text: n.text, done: !!n.done }; });
+        .map(normNotice);
     }
+    if (Array.isArray(d.noticeTemplates)) board.noticeTemplates = normTemplates(d.noticeTemplates);
     if (Array.isArray(d.events)) {
       board.events = d.events
         .filter(function (e) { return e && typeof e.name === 'string' && typeof e.date === 'string'; })
